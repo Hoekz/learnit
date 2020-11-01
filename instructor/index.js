@@ -1,69 +1,48 @@
-const inquirer = require('inquirer');
-const simpleGit = require('simple-git');
-
 const progress = require('./progress');
 const settings = require('./settings');
+const navigate = require('./navigate');
+const prompter = require('./prompter');
+const course = require('./course');
 
-const git = simpleGit();
+async function next() {
+    const state = await course.getState();
 
-const identity = a => a;
+    if (!state.module) {
+        const module = await prompter.chooseModule();
+        return await navigate.setModule(module);
+    }
 
-const settings = {
-    asDelta: false, // controls whether a commit is visited or applied only as a stage
-};
+    if (!state.chapter) {
+        const chapter = await prompter.chooseChapter(state.module);
+        return await navigate.setChapter(chapter);
+    }
 
-const prompt = (...args) => {
-    console.clear();
-    return inquirer.prompt(...args);
-};
+    if (!state.commit) {
+        // for now, simple go to first commit
+        // in the future, go to the saved commit
+    }
 
-const getBranches = async (prefix, describe = identity) => {
-    const branches = await git.branch(['--list', `${prefix}-*`]);
-    const config = await git.listConfig();
+    const choice = await prompter.navigateChapter();
 
-    return branches.all.slice().sort().map((branch, index) => ({
-        key: index < 10 ? (index + 1).toString().split('').pop() : null,
-        name: branch,
-        value: config.values['.git/config'][`branch.${branch}.description`] || describe(branch),
-    }));
-};
+    if (choice === 'back') {
+        return await navigate.setChapter(state.chapter);
+    }
 
-const mainMenu = {
-    type: 'list',
-    name: 'module',
-    message: 'Choose a Module',
-    choices: [],
-};
+    if (choice === 'next') {
+        return await navigate.nextStep();
+    }
 
-const getModules = () => getBranches('module', branch => branch
-    .replace('module-', '')
-    .split('-')
-    .map(word => word[0].toUpperCase() + word.substr(1))
-    .join(' ')
-);
+    if (choice === 'prev') {
+        return await navigate.prevStep();
+    }
+}
 
-const moduleMenu = {
-    type: 'list',
-    name: 'chapter',
-    message: 'Choose a Chapter',
-    choices: [],
-};
+async function main() {
+    let ableToNavigate = true;
 
-const getChapters = async (module) => getBranches(`${module.replace('module-', '')}-chapter`, branch => branch
-    .replace(`${module}-chapter-`, '')
-    .split('-')
-    .map(word => word[0].toUpperCase() + word.substr(1))
-    .join(' ')
-);
-
-const main = async () => {
-    mainMenu.choices = await getModules();
-
-    const { module } = await prompt(mainMenu);
-
-    moduleMenu.choices = await getChapters(module);
-
-    const { chapter } = await prompt(moduleMenu);
-};
+    while (ableToNavigate) {
+        ableToNavigate = await next();
+    }
+}
 
 main();

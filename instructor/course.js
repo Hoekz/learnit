@@ -7,8 +7,8 @@ const getBranches = async (prefix, describe = identity) => {
 
     return branches.all.slice().sort().map((branch, index) => ({
         key: index < 10 ? (index + 1).toString().split('').pop() : null,
-        name: branch,
-        value: config.values['.git/config'][`branch.${branch}.description`] || describe(branch),
+        value: branch,
+        name: config.values['.git/config'][`branch.${branch}.description`] || describe(branch),
     }));
 };
 
@@ -29,9 +29,9 @@ const getChapters = (module) => getBranches(`${module}-chapter`, readable(`${mod
 const getSteps = async (module, chapter) => {
     const commits = await getCommits(`module-${module}`, `${module}-chapter-${chapter}`);
     const start = commits.findIndex(commit => commit.message.startsWith('chapter-start'));
-    const end = commits.findIndex(commit => commit.message.startsWith('chater-end'));
+    const end = commits.findIndex(commit => commit.message.startsWith('chapter-end'));
 
-    return commits.slice(start, end);
+    return commits.slice(end, start + 1).reverse();
 };
 
 const getState = async () => {
