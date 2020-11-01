@@ -1,13 +1,15 @@
 const inquirer = require('inquirer');
 const simpleGit = require('simple-git');
 
+const progress = require('./progress');
+const settings = require('./settings');
+
 const git = simpleGit();
 
 const identity = a => a;
 
 const settings = {
     asDelta: false, // controls whether a commit is visited or applied only as a stage
-
 };
 
 const prompt = (...args) => {
