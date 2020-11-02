@@ -3,7 +3,11 @@ const course = require('./course');
 const navigate = require('./navigate');
 
 const prompt = (description, options) => {
-    console.clear();
+    if (!options.choices.length) {
+        console.log(description, 'has no choices');
+        return { value: null };
+    }
+    // console.clear();
 
     if (description instanceof Array) {
         description.forEach(line => console.log(line));
@@ -30,10 +34,10 @@ const chooseModule = async () => {
 const chooseChapter = async (module) => {
     const chapters = await course.getChapters(module);
 
-    return (await prompt(module), {
+    return (await prompt(module, {
         message: 'Choose a Chapter',
         choices: chapters,
-    }).value;
+    })).value;
 };
 
 const navigateChapter = async () => {
@@ -61,7 +65,7 @@ const navigateChapter = async () => {
 
     const scriptLines = [];
 
-    return (await prompt(scriptLines), { message: '', choices }).value;
+    return (await prompt(scriptLines, { message: '', choices })).value;
 };
 
 module.exports = { chooseModule, chooseChapter, navigateChapter };

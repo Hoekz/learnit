@@ -14,12 +14,13 @@ async function next() {
 
     if (!state.chapter) {
         const chapter = await prompter.chooseChapter(state.module);
-        return await navigate.setChapter(chapter);
+        return await navigate.setChapter(state.module, chapter);
     }
 
     if (!state.commit) {
         // for now, simple go to first commit
         // in the future, go to the saved commit
+        return;
     }
 
     const choice = await prompter.navigateChapter();
@@ -41,7 +42,12 @@ async function main() {
     let ableToNavigate = true;
 
     while (ableToNavigate) {
-        ableToNavigate = await next();
+        try {
+            ableToNavigate = await next();
+        } catch(e) {
+            console.log(e);
+            ableToNavigate = false;
+        }
     }
 }
 
