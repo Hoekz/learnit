@@ -36,13 +36,13 @@ const chooseChapter = async (module) => {
 
     return (await prompt(module, {
         message: 'Choose a Chapter',
-        choices: chapters,
+        choices: [...chapters, { key: 'b', name: 'Back to Modules', value: 'back' }],
     })).value;
 };
 
 const navigateChapter = async () => {
     const choices = [{
-        key: '0',
+        key: 'b',
         name: 'Back to Chapters',
         value: 'back',
     }];

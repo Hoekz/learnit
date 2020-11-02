@@ -1,12 +1,23 @@
 const simpleGit = require('simple-git');
 const course = require('./course');
+const progress = require('./progress');
 const { moduleToBranch, chapterToBranch } = require('./utils');
 
 const git = simpleGit();
 
 const setModule = (module) => goTo(moduleToBranch(module));
 
-const setChapter = (module, chapter) => goTo(chapterToBranch(module, chapter));
+const setChapter = async (module, chapter) => {
+    const commit = progress.current(module, chapter);
+    
+    if (commit) {
+        return goTo(commit);
+    }
+
+    const steps = await course.getSteps(module, chapter);
+
+    return goTo(steps[0].hash);
+};
 
 const nextStep = async () => {
     const state = await course.getState();

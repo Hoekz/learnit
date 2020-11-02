@@ -14,19 +14,24 @@ async function next() {
 
     if (!state.chapter) {
         const chapter = await prompter.chooseChapter(state.module);
+
+        if (chapter === 'back') {
+            return await navigate.goTo('master');
+        }
+
         return await navigate.setChapter(state.module, chapter);
     }
 
-    if (!state.commit) {
-        // for now, simple go to first commit
-        // in the future, go to the saved commit
-        return;
+    await progress.update(state.module, state.chapter, state.commit);
+
+    if (await navigate.isLastStep()) {
+        await progress.completed(state.module, state.chapter);
     }
 
     const choice = await prompter.navigateChapter();
 
     if (choice === 'back') {
-        return await navigate.setChapter(state.chapter);
+        return await navigate.setModule(state.module);
     }
 
     if (choice === 'next') {

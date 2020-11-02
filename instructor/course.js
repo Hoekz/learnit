@@ -40,7 +40,7 @@ const readable = (prefix) => (branch) => (branch
 );
 
 const getModules = () => getBranches('module', branchToModule);
-const getChapters = (module) => getBranches(chapterToBranch(module, ''), branchToChapter);
+const getChapters = (module) => getBranches(chapterToBranch(module, ''), (b) => branchToChapter(b)[1]);
 const getSteps = async (module, chapter) => {
     const commits = await getCommits(moduleToBranch(module), chapterToBranch(module, chapter));
     const start = commits.findIndex(commit => commit.message.startsWith('chapter-start'));
@@ -70,14 +70,13 @@ const mapCourse = async () => {
 };
 
 const getState = async () => {
-    const map = await mapCourse();
     const { current } = await git.status();
     const config = await git.listConfig();
-
+    
     if (current === 'master') {
         return { module: null, chapter: null, commit: null };
     }
-
+    
     if (current.startsWith('module-')) {
         return {
             module: config.values['.git/config'][`branch.${current}.description`] || readable('module-')(current),
@@ -86,19 +85,33 @@ const getState = async () => {
         };
     }
 
+    const commit = await git.revparse(['HEAD']);
+    
     if (current.includes('-chapter-')) {
         const [module, chapter] = branchToChapter(current);
-
-        const { latest } = await git.log(['-n', '1']);
-
+        
         return {
             module: config.values['.git/config'][`branch.${module}.description`] || readable('module-')(module),
             chapter: config.values['.git/config'][`branch.${current}.description`] || readable('module-')(chapter),
-            commit: latest.hash,
+            commit: commit,
         };
     }
-
     
+    const map = await mapCourse();
+
+    for (const module of map) {
+        for (const chapter of module.chapters) {
+            for (const step of chapter.steps) {
+                if (step.hash === commit) {
+                    return {
+                        module: module.value,
+                        chapter: chapter.value,
+                        commit: commit,
+                    };
+                }
+            }
+        }
+    }
 
     return { module: null, chapter: null, commit: null };
 };
