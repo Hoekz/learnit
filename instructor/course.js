@@ -1,18 +1,11 @@
 const fs = require('fs').promises;
+const Saveable = require('./saveable');
 
 const simpleGit = require('simple-git');
 const { branchToModule, branchToChapter, moduleToBranch, chapterToBranch } = require('./utils');
 const git = simpleGit();
 
-let courseMap = (() => {
-    try {
-        return require('.course');
-    } catch(e) {
-        return null;
-    }
-})();
-
-const save = async () => fs.writeFile('.course.json', JSON.stringify(courseMap), 'utf-8');
+const courseMap = new Saveable('course', null);
 
 const getBranches = async (prefix, describe = identity) => {
     console.log('getting branches with prefix', prefix);
@@ -50,13 +43,13 @@ const getSteps = async (module, chapter) => {
 };
 
 const mapCourse = async () => {
-    if (courseMap) {
-        return courseMap;
+    if (courseMap.value) {
+        return courseMap.value;
     }
 
-    courseMap = await getModules();
+    courseMap.value = await getModules();
 
-    for (const module of courseMap) {
+    for (const module of courseMap.value) {
         module.chapters = await getChapters(module.value);
 
         for (const chapter of module.chapters) {
@@ -64,9 +57,9 @@ const mapCourse = async () => {
         }
     }
 
-    await save();
+    await courseMap.save();
 
-    return courseMap;
+    return courseMap.value;
 };
 
 const getState = async () => {

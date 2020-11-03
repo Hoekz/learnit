@@ -1,22 +1,14 @@
-const fs = require('fs').promises;
+const Saveable = require('./saveable');
 
-const settings = (() => {
-    try {
-        return require('.settings');
-    } catch(e) {
-        return {};
-    }
-})();
-
-const save = async () => fs.writeFile('.settings.json', JSON.stringify(settings), 'utf-8');
+const settings = new Saveable('settings');
 
 module.exports = {
-    save,
+    save: settings.save,
     get(key) {
-        return settings[key];
+        return settings.value[key];
     },
     set(key, value) {
-        settings[key] = value;
-        return save();
+        settings.value[key] = value;
+        return settings.save();
     }
 };

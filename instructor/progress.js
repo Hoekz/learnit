@@ -1,22 +1,14 @@
-const fs = require('fs').promises;
+const Saveable = require('./saveable');
 
-const progress = (() => {
-    try {
-        return require('.progress');
-    } catch(e) {
-        return {};
-    }
-})();
-
-const save = async () => fs.writeFile('.progress.json', JSON.stringify(progress), 'utf-8');
+const progress = new Saveable('progress');
 
 const ensure = (mod, chapter) => {
-    if (!(mod in progress)) {
-        progress[mod] = {};
+    if (!(mod in progress.value)) {
+        progress.value[mod] = {};
     }
 
-    if (!(chapter in progress[mod])) {
-        progress[mod][chapter] = { completed: false, commit: '' };
+    if (!(chapter in progress.value[mod])) {
+        progress.value[mod][chapter] = { completed: false, commit: '' };
     }
 };
 
@@ -24,26 +16,26 @@ module.exports = {
     save,
     completed(mod, chapter) {
         ensure(mod, chapter);
-        progress[mod][chapter].completed = true;
-        return save();
+        progress.value[mod][chapter].completed = true;
+        return progress.save();
     },
     update(mod, chapter, commit) {
         ensure(mod, chapter);
-        progress[mod][chapter].commit = commit;
-        return save();
+        progress.value[mod][chapter].commit = commit;
+        return progress.save();
     },
     reset(mod, chapter) {
         ensure(mod, chapter);
-        progress[mod][chapter] = { completed: false, commit: '' };
-        return save();
+        progress.value[mod][chapter] = { completed: false, commit: '' };
+        return progress.save();
     },
     count(mod) {
-        return mod in progress
-            ? Object.values(progress[mod]).filter(chapter => chapter.completed).length
+        return mod in progress.value
+            ? Object.values(progress.value[mod]).filter(chapter => chapter.completed).length
             : 0;
     },
     current(mod, chapter = null) {
-        const module = progress[mod];
+        const module = progress.value[mod];
 
         if (!module) {
             return null;
