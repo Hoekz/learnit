@@ -1,4 +1,4 @@
-const createCourse = require('./create-course');
+const courses = require('./courses');
 const modules = require('./modules');
 const chapters = require('./chapters');
 const steps = require('./steps');
@@ -28,7 +28,7 @@ const processCommand = ({ command, args }, argv) => {
                 const [key, options] = namedArgs.find(([key]) => snake(key) === argKey);
                 parsedArgs[key] = parseArg(options.type, argValue);
             } catch (e) {
-                console.log(`Unrecognized named argument '${argKey}'`);
+                console.log(`Unrecognized named argument '${argKey}'.`);
                 process.exit();
             }
 
@@ -119,7 +119,7 @@ const helpCommand = {
 };
 
 const commands = {
-    'init': createCourse,
+    'init': courses.create,
     'create': {
         'module': modules.create,
         'chapter': chapters.create,
@@ -135,7 +135,7 @@ const commands = {
     'summarize': {
         'chapter': chapters.summarize,
         'module': modules.summarize,
-        // 'course': summarizeCourse,
+        'course': courses.summarize,
     },
     'run': createCommand,
     'help': helpCommand,

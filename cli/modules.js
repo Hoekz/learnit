@@ -24,7 +24,7 @@ module.exports = {
         args: {
             chapters: {
                 description: 'Chapters to summarize.',
-                type: 'STR',
+                type: 'STR[]',
                 named: true,
                 hint: '<c1>,<c2>',
                 optional: true,

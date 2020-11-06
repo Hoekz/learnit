@@ -170,7 +170,7 @@ usually would show the user the final state of all modules by merging all branch
 `{module}-summary` and then allowing you to write a short synopsis. You can do this by running:
 
 ```
-learnit summarize course [--modules=<m1>,<m2>] [--only-show-on-complete=true]
+learnit summarize course [--modules=<m1>,<m2>] [--only-show-on-complete=[true]]
 ```
 
 You can optionally set which modules are included in the summary as well as control when the user
