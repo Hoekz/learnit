@@ -1,3 +1,4 @@
+const { getState } = require('../common/course');
 
 module.exports = {
     description: 'Associate a script or command with a point in the course.',

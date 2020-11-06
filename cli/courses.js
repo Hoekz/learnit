@@ -1,4 +1,4 @@
-const { create } = require("./modules")
+const { getState } = require('../common/course');
 
 module.exports = {
     create: {

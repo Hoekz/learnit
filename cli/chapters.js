@@ -1,3 +1,4 @@
+const { getState } = require('../common/course');
 
 module.exports = {
     create: {
