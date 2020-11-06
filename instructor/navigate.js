@@ -1,7 +1,7 @@
 const simpleGit = require('simple-git');
-const course = require('./course');
+const course = require('../common/course');
 const progress = require('./progress');
-const { moduleToBranch, chapterToBranch } = require('./utils');
+const { moduleToBranch } = require('../common/utils');
 
 const git = simpleGit();
 

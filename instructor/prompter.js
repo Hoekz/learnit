@@ -1,5 +1,5 @@
 const inquirer = require('inquirer');
-const course = require('./course');
+const course = require('../common/course');
 const navigate = require('./navigate');
 
 const prompt = (description, options) => {

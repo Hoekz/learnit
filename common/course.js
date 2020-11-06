@@ -2,13 +2,12 @@ const fs = require('fs').promises;
 const Saveable = require('./saveable');
 
 const simpleGit = require('simple-git');
-const { branchToModule, branchToChapter, moduleToBranch, chapterToBranch } = require('./utils');
+const { branchToModule, branchToChapter, moduleToBranch, chapterToBranch } = require('../instructor/utils');
 const git = simpleGit();
 
 const courseMap = new Saveable('course', null);
 
 const getBranches = async (prefix, describe = identity) => {
-    console.log('getting branches with prefix', prefix);
     const branches = await git.branch(['--list', `${prefix}*`]);
     const config = await git.listConfig();
 
@@ -20,7 +19,6 @@ const getBranches = async (prefix, describe = identity) => {
 };
 
 const getCommits = async (from, to) => {
-    console.log('getting commits from', from, 'to', to);
     const logs = await git.log({ from, to });
     return logs.all;
 };

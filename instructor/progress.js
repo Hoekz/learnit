@@ -1,4 +1,4 @@
-const Saveable = require('./saveable');
+const Saveable = require('../common/saveable');
 
 const progress = new Saveable('progress');
 

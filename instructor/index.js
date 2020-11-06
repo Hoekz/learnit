@@ -2,7 +2,7 @@ const progress = require('./progress');
 const settings = require('./settings');
 const navigate = require('./navigate');
 const prompter = require('./prompter');
-const course = require('./course');
+const course = require('../common/course');
 
 async function next() {
     const state = await course.getState();
