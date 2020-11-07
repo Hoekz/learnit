@@ -1,10 +1,29 @@
-const { getState } = require('../common/course');
+const path = require('path');
+const simpleGit = require('simple-git');
+const { getState, isGitRepo } = require('../common/course');
+
+const git = simpleGit();
 
 module.exports = {
     create: {
         description: 'Initializes a course. If you are already in a git repo, it will be used.',
         args: {},
-        command() {},
+        async command() {
+            const dir = path.basename(process.cwd());
+            if (await isGitRepo()) {
+                console.log(`A repo already exists in ${dir}.`);
+            } else {
+                console.log(`No repo detected, creating a course repo in ${dir}.`);
+
+                try {
+                    await git.init();
+                } catch (e) {
+                    console.log('Unable to create repo:');
+                    console.log(e);
+                    process.exit(1);
+                }
+            }
+        },
     },
     summarize: {
         description: 'Creates a summary of the course.',

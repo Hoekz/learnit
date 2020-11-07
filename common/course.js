@@ -1,8 +1,8 @@
 const fs = require('fs').promises;
 const Saveable = require('./saveable');
-
 const simpleGit = require('simple-git');
-const { branchToModule, branchToChapter, moduleToBranch, chapterToBranch } = require('../instructor/utils');
+const { branchToModule, branchToChapter, moduleToBranch, chapterToBranch } = require('../common/utils');
+
 const git = simpleGit();
 
 const courseMap = new Saveable('course', null);
@@ -107,10 +107,20 @@ const getState = async () => {
     return { module: null, chapter: null, commit: null };
 };
 
+const isGitRepo = async () => {
+    try {
+        await fs.access('.git');
+        return true;
+    } catch(e) {
+        return false;
+    }
+};
+
 module.exports = {
     getModules,
     getChapters,
     getSteps,
     getState,
-    mapCourse
+    mapCourse,
+    isGitRepo,
 };

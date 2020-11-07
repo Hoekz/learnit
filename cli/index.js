@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const courses = require('./courses');
 const modules = require('./modules');
 const chapters = require('./chapters');
@@ -48,7 +50,6 @@ const processCommand = ({ command, args }, argv) => {
         }
     });
 
-    console.log('calling with', parsedArgs);
     return command(parsedArgs);
 };
 
@@ -155,10 +156,10 @@ if (!rest.length) {
         help({ command });
         process.exit();
     }
-}
-
-if (commands[command].command) {
-    processCommand(commands[command], rest);
 } else {
-    processCommand(commands[command][rest[0]], rest.slice(1));
+    if (commands[command].command) {
+        processCommand(commands[command], rest);
+    } else {
+        processCommand(commands[command][rest[0]], rest.slice(1));
+    }
 }
