@@ -1,6 +1,6 @@
 const path = require('path');
 const simpleGit = require('simple-git');
-const { getState, isGitRepo } = require('../common/course');
+const { mapCourse, isGitRepo } = require('../common/course');
 
 const git = simpleGit();
 
@@ -43,6 +43,23 @@ module.exports = {
                 optional: true,
             },
         },
-        command({ modules, onlyShowOnComplete }) {}
+        async command({ modules, onlyShowOnComplete }) {
+            const course = await mapCourse();
+            const moduleBranchesInCourse = Object.values(course).map(entry => entry.value);
+            const moduleNamesInCourse = Object.values(course).map(entry => entry.name);
+
+            modules = modules || moduleBranchesInCourse;
+
+            for (const module of modules) {
+                if (!moduleBranchesInCourse.includes(module) && !moduleNamesInCourse.includes(module)) {
+                    console.log(`Unrecognized module '${module}'. Either use the branch name or title of the module.`);
+                    process.exit();
+                }
+            }
+
+            // TODO: confirm all modules listed have a summary
+            // TODO: merge all modules listed into branch
+            // TODO: add show on complete flag if necessary
+        }
     }
 };

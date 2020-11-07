@@ -30,7 +30,7 @@ chapter.
 ## Taking a Course
 
 You can take a course by cloning a repository created or meant to be read with Learn It.
-Once you've cloned the repo, simply navigate to its top-level directory and run `learnit`.
+Once you've cloned the repo, simply navigate to its top-level directory and run `learnit start`.
 
 You may be encouraged to open a second terminal to view output from processes the instructor
 set up to run when taking the course. These processes can be things like tests, local servers,
@@ -222,4 +222,4 @@ chapter directly, the current location is assumed).
 
 You can pass in the flag `--reload-on-step` to ensure the command will be stopped if it is currently
 running and the started again. Additionally, the user may at any time restart all commands by
-simpley killing the `output` session and restarting it.
+simpley killing the `learnit output` session and restarting it.

@@ -1,4 +1,4 @@
-const { getState } = require('../common/course');
+const { getState, mapCourse } = require('../common/course');
 
 module.exports = {
     create: {
@@ -32,7 +32,12 @@ module.exports = {
                 optional: true,
             },
         },
-        command({ chapterTitle, module, merge, base }) {},
+        async command({ chapterTitle, module, merge, base }) {
+            const state = await getState();
+            const course = await mapCourse();
+
+            module = module || state.module;
+        },
     },
     finish: {
         description: 'Designates a chapter as completed and optionally merges it back into the module branch.',
