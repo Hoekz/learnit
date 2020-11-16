@@ -27,7 +27,6 @@ const isBranch = (str) => str && !str.includes(' ') && str.includes('-');
 
 const moduleToBranch = (module) => isBranch(module) ? module : apply(modulePattern, module);
 const chapterToBranch = (module, chapter) => {
-    console.log('called with:', JSON.stringify(module), JSON.stringify(chapter));
     if (isBranch(chapter)) {
         return chapter;
     }

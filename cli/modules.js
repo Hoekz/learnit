@@ -1,4 +1,9 @@
+const simpleGit = require('simple-git');
 const { getState } = require('../common/course');
+const { moduleToBranch, branchToModule, chapterToBranch } = require('../common/utils');
+const { isExistingModule, isExistingChapter, chapterFrom, setBranchValue } = require('./git-helpers');
+
+const git = simpleGit();
 
 module.exports = {
     create: {
@@ -18,7 +23,23 @@ module.exports = {
                 optional: true,
             }
         },
-        command({ moduleBranchOrName, name }) {},
+        async command({ moduleBranchOrName, name }) {
+            const branch = moduleToBranch(moduleBranchOrName);
+            name = name || branchToModule(moduleBranchOrName);
+
+            if (await isExistingModule(branch)) {
+                console.log(`A module with the branch name '${branch}' already exists.`);
+                process.exit(1);
+            }
+
+            if (await isExistingModule(name)) {
+                console.log(`A module with the name '${name}' already exists.`);
+                process.exit(1);
+            }
+
+            await git.checkoutBranch(branch, 'master');
+            await git.addConfig(`branch.${branch}.description`, name);
+        },
     },
     summarize: {
         description: 'Creates a summary of a module. Defaults to summarizing all chapters.',
@@ -38,6 +59,35 @@ module.exports = {
                 optional: true,
             },
         },
-        command({ chapters, onlyShowOnComplete }) {},
+        async command({ chapters, onlyShowOnComplete }) {
+            const state = await getState();
+            
+            if (!state.module) {
+                console.log('Cannot create module summary when not in a module.');
+                process.exit(1);
+            }
+            
+            const { actualChapters: chapters } = await getModule(state.module);
+
+            chapters = chapters || actualChapters.map(chapter => chapter.value);
+
+            for (const chapter of chapters) {
+                if (!await isExistingChapter(chapter)) {
+                    console.log(`Unrecognized chapter '${chapter}'. Either use the branch name or title of the chapter.`);
+                    process.exit(1);
+                }
+            }
+
+            const toMerge = await Promise.all(chapters.map(chapterFrom(state.module)));
+
+            const newBranch = chapterToBranch(state.module, 'summary');
+            await git.checkoutBranch(newBranch, module.branch);
+
+            for (const chapter of toMerge) {
+                await git.mergeFromTo(chapter.value, newBranch);
+            }
+
+            await setBranchValue(newBranch, 'require-complete', !!onlyShowOnComplete);
+        },
     },
-}
+};

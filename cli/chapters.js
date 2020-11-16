@@ -1,4 +1,12 @@
-const { getState, mapCourse } = require('../common/course');
+const simpleGit = require('simple-git');
+const { getState } = require('../common/course');
+const { chapterToBranch, moduleToBranch } = require('../common/utils');
+const {
+    nextChapterIndex,
+    getBranchConfig, setBranchValue, setBranchDescription
+} = require('./git-helpers');
+
+const git = simpleGit();
 
 module.exports = {
     create: {
@@ -34,9 +42,35 @@ module.exports = {
         },
         async command({ chapterTitle, module, merge, base }) {
             const state = await getState();
-            const course = await mapCourse();
+
+            if (module && !await isExistingModule(module)) {
+                console.log(`Module '${module}' does not exist.`);
+                process.exit(1);
+            }
 
             module = module || state.module;
+
+            if (!module) {
+                console.log(`Cannot create chapter: you are not current in a module or did not specify a module.`);
+                process.exit(1);
+            }
+
+            const chapter = chapterTitle || await nextChapterIndex(module);
+
+            if (await isExistingChapter(chapter)) {
+                console.log(`Chapter '${chapter}' already exists.`);
+                process.exit(1);
+            }
+
+            const newBranch = chapterToBranch(module || state.module, chapter);
+            base = moduleToBranch(module); // TODO: allow different base
+
+            await git.checkoutBranch(newBranch, base);
+            await setBranchDescription(newBranch, chapter);
+
+            if (merge !== undefined) {
+                await setBranchValue(newBranch, 'merge', !!merge);
+            }
         },
     },
     finish: {
@@ -50,7 +84,29 @@ module.exports = {
                 optional: true,
             },
         },
-        command({ merge }) {},
+        async command({ merge }) {
+            const state = await getState();
+
+            if (!state.chapter) {
+                console.log('You are not currently navigated to a chapter.');
+                process.exit(1);
+            }
+            
+            if (merge === undefined) {
+                const config = await getBranchConfig(state.chapter);
+                merge = config.merge === undefined ? true : config.merge;
+            }
+
+            const step = await lastStepFrom(state.module, state.chapter);
+
+            if (!step.message.startsWith('chapter-end')) {
+                await git.commit(step.message ? `chapter-end: ${step.message}` : 'chapter-end', ['--amend']);
+            }
+
+            if (merge) {
+                await git.mergeFromTo(state.chapter, state.module);
+            }
+        },
     },
     summarize: {
         description: 'Creates a summary of a chapter.',
@@ -63,6 +119,33 @@ module.exports = {
                 optional: true,
             },
         },
-        command({ onlyShowOnComplete }) {},
+        async command({ onlyShowOnComplete }) {
+            const state = await getState();
+
+            if (!state.chapter) {
+                console.log('You are not currently navigated to a chapter.');
+                process.exit(1);
+            }
+
+            const last = await lastStepFrom(state.module, state.chapter);
+
+            if (!last.startsWith('chapter-end')) {
+                console.log(`Chapter '${state.chapter}' must be finished first. Run 'learnit chapter finish'.`);
+                process.exit(1);
+            }
+
+            const first = await firstStepFrom(state.module, state.chapter);
+            const branch = chapterToBranch(state.module, state.chapter);
+            const newBranch = `summary-${branch}`;
+
+            if ((await git.branchLocal()).all.includes(newBranch)) {
+                console.log(`Chapter '${state.chapter}' has already been summarized.`);
+                process.exit();
+            }
+
+            await git.checkoutBranch(newBranch, first.hash);
+            await git.mergeFromTo(branch, newBranch);
+            await setBranchValue(newBranch, 'require-complete', !!onlyShowOnComplete);
+        },
     },
 };
