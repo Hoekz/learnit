@@ -54,12 +54,15 @@ CLI provides all the tools you should need to create a course.
 You can add a module to a course with the command:
 
 ```
-learnit create module <module_branch_or_name> [--name=<module_name>]
+learnit create module <module_branch_or_name> [--name=<module_name>] [--cwd=<directory>]
 ```
 
 You can provide the module name as a branch (`module-module-name`) or the name (`Module Name`),
 or both (When providing both, provide the name as a named argument). If you do not provide one
 or the other, it will be inferred.
+
+You can also provide a working directory for the module, which will force only changes in that
+folder to be committed and will be the assumed directory to run any commands in.
 
 ### Adding a Chapter
 
@@ -212,7 +215,7 @@ duplicated output.
 Adding a command to run is very easy:
 
 ```
-learnit run <command> [--module=<module>] [--chapter=<chapter>] [--step=<step>] [--reload-on-step=[false]]
+learnit run <command> [--module=<module>] [--chapter=<chapter>] [--step=<step>] [--reload-on-step=[false]] [--cwd=[directory]]
 ```
 
 Depending on where you are currently navigated to and where you want to run the command, you will
@@ -223,3 +226,39 @@ chapter directly, the current location is assumed).
 You can pass in the flag `--reload-on-step` to ensure the command will be stopped if it is currently
 running and the started again. Additionally, the user may at any time restart all commands by
 simpley killing the `learnit output` session and restarting it.
+
+The delta output can be controlled further by using a `.learnitignore` to dictate which files should not be
+shown in the delta. By default, any `.SCRIPT.md`, `.learnitignore` and progress files are ignored.
+**Currently this ignore file is only supported at the course's root directory.**
+
+## TODO: What is to Come
+
+For creators:
+
+ - `learnit init` - completed, might need to have it initialize some more things though.
+ - `learnit create module` - completed.
+ - `learnit summarize module` - mostly done, still need reader to respect flag and summaries.
+ - `learnit create chapter` - completed.
+ - `learnit summarize chapter` - mostly done, still need reader to respect flag and summaries.
+ - `learnit create step` - started.
+ - `.learnitignore` - not started, eventually want multiple directory support, support module or chapter annotations
+ - `.SCRIPT.md` - not started, prompt when creating module, chapter, and step, associate with module
+ - mark course/module/chapter as complete - started, have mechanism for keeping track of progress
+ - `learnit save` - not started, create a commit that is not a step, etc.
+ - `learnit upload` - not started, equivalent to `git push --force-with-lease`
+ - `learnit rebase` - not started, rebase all branches intelligently (for changes to master that need to be everywhere)
+ - add cwd to creation of modules to allow scoping of commits, running of commands
+ - `learnit squash-scripts` - not started, collapses all changes to scripts to single commit so it does not change dynamically.
+
+For consumers:
+
+ - `learnit start`- started, navigates course, needs to print script
+ - `learnit output` - not started, watches location and starts/stops commands as necessary, reporting their output
+ - `learnit reset` - not started, erases all progress, resets to `master`
+ - `learnit bookmark` - not started, allows user to set up a quick return point
+ - `learnit annotate` - not started, allows user to save changes they made`
+ - `learnit settings` - not started, allows user to configure setup, such as soft stepping so that deltas are visible to outside programs.
+
+For both:
+
+ - contextual `help` - not started, only render commands that are relevant to current situation
