@@ -7,11 +7,11 @@ const {
 } = require('./git-helpers');
 
 const addCommandToBranch = async (branch, command, reloadOnStep, cwd) => {
-    const { commands = [] } = await getBranchConfig(branch);
-    await setBranchValue(branch, 'commands', [...commands, {
+    const config = await getBranchConfig(branch);
+    await setBranchValue(branch, 'commands', [...(config.commands || []), {
         run: command,
         refresh: !!reloadOnStep,
-        cwd: cwd || process.cwd(),
+        cwd: cwd || config.cwd || process.cwd(),
     }]);
 };
 
@@ -74,7 +74,6 @@ module.exports = {
             chapter = state.chapter;
             step = state.step;
         }
-
         
         if (!module) {
             const confirm = (await inquirer.prompt({

@@ -1,7 +1,11 @@
 const simpleGit = require('simple-git');
 const { getState } = require('../common/course');
 const { moduleToBranch, branchToModule, chapterToBranch } = require('../common/utils');
-const { isExistingModule, isExistingChapter, chapterFrom, setBranchValue } = require('./git-helpers');
+const {
+    isExistingModule, isExistingChapter,
+    chapterFrom,
+    setBranchValue, setBranchDescription
+} = require('./git-helpers');
 
 const git = simpleGit();
 
@@ -21,9 +25,16 @@ module.exports = {
                 named: true,
                 hint: '<module_name>',
                 optional: true,
-            }
+            },
+            cwd: {
+                description: 'Specify the directory to watch for changes and run commands in.',
+                type: 'STR',
+                named: true,
+                hint: '<directory>',
+                optional: true,
+            },
         },
-        async command({ moduleBranchOrName, name }) {
+        async command({ moduleBranchOrName, name, cwd }) {
             const branch = moduleToBranch(moduleBranchOrName);
             name = name || branchToModule(moduleBranchOrName);
 
@@ -38,7 +49,10 @@ module.exports = {
             }
 
             await git.checkoutBranch(branch, 'master');
-            await git.addConfig(`branch.${branch}.description`, name);
+            await setBranchDescription(branch, name);
+            if (cwd) {
+                await setBranchValue(branch, 'cwd', cwd);
+            }
         },
     },
     summarize: {
