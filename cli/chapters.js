@@ -115,7 +115,6 @@ module.exports = {
                 description: 'Limit when a user can view the chapter summary.',
                 type: 'BOOL',
                 named: true,
-                hint: '[true]',
                 optional: true,
             },
         },

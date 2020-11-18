@@ -62,7 +62,6 @@ module.exports = {
                 description: 'Whether to allow the user to select the summary before course is completed.',
                 type: 'BOOL',
                 named: true,
-                hint: '[true]',
                 optional: true,
             },
         },

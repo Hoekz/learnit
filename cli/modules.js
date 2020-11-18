@@ -69,7 +69,6 @@ module.exports = {
                 description: 'Only allow the user to select the summary after completing the module.',
                 type: 'BOOL',
                 named: true,
-                hint: 'true',
                 optional: true,
             },
         },

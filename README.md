@@ -215,7 +215,7 @@ duplicated output.
 Adding a command to run is very easy:
 
 ```
-learnit run <command> [--module=<module>] [--chapter=<chapter>] [--step=<step>] [--reload-on-step=[false]] [--cwd=[directory]]
+learnit create command <command> [--module=<module>] [--chapter=<chapter>] [--step=<step>] [--reload-on-step=[false]] [--cwd=[directory]]
 ```
 
 Depending on where you are currently navigated to and where you want to run the command, you will

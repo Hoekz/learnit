@@ -43,17 +43,19 @@ async function next() {
     }
 }
 
-async function main() {
-    let ableToNavigate = true;
-
-    while (ableToNavigate) {
-        try {
-            ableToNavigate = await next();
-        } catch(e) {
-            console.log(e);
-            ableToNavigate = false;
+module.exports = {
+    description: 'Start reading the course through the interactive instructor.',
+    args: {},
+    async command() {
+        let ableToNavigate = true;
+    
+        while (ableToNavigate) {
+            try {
+                ableToNavigate = await next();
+            } catch(e) {
+                console.log(e);
+                ableToNavigate = false;
+            }
         }
-    }
-}
-
-main();
+    },
+};

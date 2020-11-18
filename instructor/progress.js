@@ -13,7 +13,6 @@ const ensure = (mod, chapter) => {
 };
 
 module.exports = {
-    save,
     completed(mod, chapter) {
         ensure(mod, chapter);
         progress.value[mod][chapter].completed = true;

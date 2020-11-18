@@ -5,12 +5,14 @@ const modules = require('./modules');
 const chapters = require('./chapters');
 const steps = require('./steps');
 const createCommand = require('./create-command');
+const instructor = require('../instructor');
+const output = require('../output');
 const { snake, underscore } = require('./utils');
 
 const parseArg = (type, str) => {
     switch (type) {
         case 'STR': return str;
-        case 'BOOL': return str.toLowerCase() === 'true';
+        case 'BOOL': return !str || str.toLowerCase() === 'true';
         case 'STR[]': return str.split(',');
     }
 };
@@ -58,9 +60,10 @@ const documentation = (first, second, { description, args }) => {
     console.log(`     - ${description}`);
 
     for (const arg in args) {
-        let asArg = args[arg].named ? `--${snake(arg)}=${args[arg].hint}` : underscore(arg);
-        asArg = args[arg].optional ? `[${asArg}]` : `<${asArg}>`;
-        console.log(`      ${asArg}: (${args[arg].type}) ${args[arg].description}`);
+        const { named, hint, optional, type, description } = args[arg]; 
+        let asArg = named ? `--${snake(arg)}${hint ? `=${hint}` : ''}` : underscore(arg);
+        asArg = optional ? `[${asArg}]` : `<${asArg}>`;
+        console.log(`      ${asArg}: (${type}) ${description}`);
     }
 };
 
@@ -119,28 +122,35 @@ const helpCommand = {
     command: help,
 };
 
-const commands = {
+const writerCommands = {
     'init': courses.create,
     'create': {
         'module': modules.create,
         'chapter': chapters.create,
         'step': steps.create,
+        'command': createCommand,
     },
     'edit': {
         'step': steps.edit,
     },
     'finish': {
         'chapter': chapters.finish,
-        'step': steps.finish,
+        // 'step': steps.finish,
     },
     'summarize': {
         'chapter': chapters.summarize,
         'module': modules.summarize,
         'course': courses.summarize,
     },
-    'run': createCommand,
     'help': helpCommand,
 };
+
+const readerCommands = {
+    'start': instructor,
+    'output': output,
+};
+
+const commands = { ...writerCommands, ...readerCommands };
 
 const [command, ...rest] = process.argv.slice(2);
 

@@ -25,17 +25,16 @@ module.exports = {
                 optional: true,
             },
         },
-        command({ label, module, chapter }) {},
+        async command({ label, module, chapter }) {
+            // TODO: default label to current index
+            // TODO: pull in current module and chapter
+            // TODO: limit adding to only module cwd
+            // TODO: create commit
+        },
     },
     edit: {
-        description: 'Allows for editing of a previously committed step.',
+        description: 'Allows for editing of the last committed step.',
         args: {
-            labelOrIndex: {
-                description: 'The label or index of the step to edit.',
-                type: 'STR',
-                named: false,
-                optional: true,
-            },
             module: {
                 description: 'The module in which to edit the step.',
                 type: 'STR',
@@ -51,11 +50,15 @@ module.exports = {
                 optional: true,
             },
         },
-        command({ labelOrIndex, module, chapter }) {},
+        async command({ module, chapter }) {
+            // TODO: pull in current module and chapter
+            // TODO:limit adding to only module cwd
+            // TODO: amend commit
+        },
     },
-    finish: {
-        description: 'When editing a step, it is necessary to mark the changes as finished to proceed.',
-        args: {},
-        command() {},
-    },
+    // finish: {
+    //     description: 'When editing a step, it is necessary to mark the changes as finished to proceed.',
+    //     args: {},
+    //     async command() {},
+    // },
 };
