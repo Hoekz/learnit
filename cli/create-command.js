@@ -6,12 +6,13 @@ const {
     getModule, chapterFrom
 } = require('./git-helpers');
 
-const addCommandToBranch = async (branch, command, reloadOnStep, cwd) => {
+const addCommandToBranch = async (branch, command, reloadOnStep, cwd, label) => {
     const config = await getBranchConfig(branch);
     await setBranchValue(branch, 'commands', [...(config.commands || []), {
         run: command,
         refresh: !!reloadOnStep,
         cwd: cwd || config.cwd || process.cwd(),
+        prefix: label,
     }]);
 };
 
@@ -64,8 +65,15 @@ module.exports = {
             hint: '<directory>',
             optional: true,
         },
+        label: {
+            description: 'Label to prepend to command output.',
+            type: 'STR',
+            named: true,
+            hint: '<label>',
+            optional: true,
+        }
     },
-    async command({ command, module, chapter, step, atCurrent, reloadOnStep, cwd }) {
+    async command({ command, module, chapter, step, atCurrent, reloadOnStep, cwd, label }) {
         if (atCurrent) {
             state = await getState();
             module = state.module;
@@ -82,7 +90,7 @@ module.exports = {
             })).value;
             
             if (confirm) {
-                await addCommandToBranch('master', command, reloadOnStep, cwd);
+                await addCommandToBranch('master', command, reloadOnStep, cwd, label);
             }
 
             process.exit();
@@ -95,7 +103,7 @@ module.exports = {
 
         if (!chapter) {
             const { value } = await getModule(module);
-            await addCommandToBranch(value, command, reloadOnStep, cwd);
+            await addCommandToBranch(value, command, reloadOnStep, cwd, label);
             process.exit();
         }
 
@@ -107,7 +115,7 @@ module.exports = {
         const { value } = await chapterFrom(module)(chapter);
 
         if (!step) {
-            await addCommandToBranch(value, command, reloadOnStep, cwd);
+            await addCommandToBranch(value, command, reloadOnStep, cwd, label);
             process.exit();
         }
 
@@ -116,6 +124,6 @@ module.exports = {
             process.exit(1);
         }
 
-        await addCommandToBranch(`${value}.${step}`, command, false, cwd);
+        await addCommandToBranch(`${value}.${step}`, command, false, cwd, label);
     },
 };

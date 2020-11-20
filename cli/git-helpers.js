@@ -48,6 +48,11 @@ const lastStepFrom = async (module, chapter) => {
     return steps[steps.length - 1];
 };
 
+const stepFrom = async (module, chapter, step) => {
+    const { steps } = await chapterFrom(module)(chapter);
+    return steps.find(s => s.message === `step: ${step}` || s.message === step || s.hash === step);
+};
+
 const setBranchValue = async (branch, key, value) => {
     await git.addConfig(`learnit.${branch}.${key}`, JSON.stringify(value));
 
@@ -77,5 +82,5 @@ module.exports = {
     getBranchConfig, setBranchValue, setBranchDescription,
     isExistingModule, getModule,
     isExistingChapter, chapterFrom, nextChapterIndex,
-    isExistingStep, lastStepFrom,
+    isExistingStep, lastStepFrom, stepFrom,
 };

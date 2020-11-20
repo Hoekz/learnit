@@ -6,6 +6,7 @@ const { branchToModule, branchToChapter, moduleToBranch, chapterToBranch } = req
 const git = simpleGit();
 
 const courseMap = new Saveable('course', null);
+const state = new Saveable('state', )
 
 const getBranches = async (prefix, describe = identity) => {
     const branches = await git.branch(['--list', `${prefix}*`]);
@@ -34,8 +35,8 @@ const getModules = () => getBranches('module', branchToModule);
 const getChapters = (module) => getBranches(chapterToBranch(module, ''), (b) => branchToChapter(b)[1]);
 const getSteps = async (module, chapter) => {
     const commits = await getCommits(moduleToBranch(module), chapterToBranch(module, chapter));
-    const start = commits.findIndex(commit => commit.message.startsWith('chapter-start'));
-    const end = commits.findIndex(commit => commit.message.startsWith('chapter-end'));
+    const start = commits.findIndex(commit => commit.message === 'step: chapter-start');
+    const end = commits.findIndex(commit => commit.message === 'step: chapter-end');
 
     return commits.slice(end, start + 1).reverse();
 };
@@ -97,6 +98,7 @@ const getState = async () => {
                     return {
                         module: module.value,
                         chapter: chapter.value,
+                        step: step.message,
                         commit: commit,
                     };
                 }
