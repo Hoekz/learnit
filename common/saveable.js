@@ -27,12 +27,9 @@ module.exports = class Saveable {
         if (!this.watching) {
             this.watching = true;
             watch(this.file, {}, async (event) => {
-                switch(event) {
-                    case 'change':
-                        if (!this.locked) {
-                            this.value = JSON.parse((await fs.readFile(this.file)).toString());
-                            this.listeners.forEach(fn => fn(this.value));
-                        }
+                if (event === 'change' && !this.locked) {
+                    this.value = JSON.parse((await fs.readFile(this.file)).toString());
+                    this.listeners.forEach(fn => fn(this.value));
                 }
             });
         }
