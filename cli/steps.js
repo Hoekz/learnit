@@ -1,4 +1,6 @@
 const { getState } = require('../common/course');
+const { unrecognized } = require('../common/errors');
+const { nextChapterIndex, chapterFrom, isExistingModule, isExistingChapter } = require('./git-helpers');
 
 module.exports = {
     create: {
@@ -26,6 +28,19 @@ module.exports = {
             },
         },
         async command({ label, module, chapter }) {
+            const state = await getState();
+            module = module || state.module;
+            chapter = chapter || state.chapter;
+
+            if (!await isExistingModule(module)) {
+                unrecognized.module(module);
+            }
+
+            if (!await isExistingChapter(module, chapter)) {
+                unrecognized.chapter(chapter);
+            }
+
+            label = label || (await chapterFrom(module)(chapter).steps.length);
             // TODO: default label to current index
             // TODO: pull in current module and chapter
             // TODO: limit adding to only module cwd

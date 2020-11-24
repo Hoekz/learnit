@@ -8,6 +8,7 @@ const createCommand = require('./create-command');
 const instructor = require('../instructor');
 const output = require('../output');
 const { snake, underscore } = require('./utils');
+const { unrecognized } = require('../common/errors');
 
 const parseArg = (type, str) => {
     switch (type) {
@@ -32,8 +33,7 @@ const processCommand = ({ command, args }, argv) => {
                 const [key, options] = namedArgs.find(([key]) => snake(key) === argKey);
                 parsedArgs[key] = parseArg(options.type, argValue);
             } catch (e) {
-                console.log(`Unrecognized named argument '${argKey}'.`);
-                process.exit();
+                unrecognized.arg(argKey);
             }
 
         } else if (unnamedArgs.length) {

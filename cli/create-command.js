@@ -1,5 +1,6 @@
 const inquirer = require('inquirer');
 const { getState } = require('../common/course');
+const { unrecognized } = require('../common/errors');
 const {
     isExistingModule, isExistingChapter, isExistingStep,
     setBranchValue, getBranchConfig,
@@ -97,8 +98,7 @@ module.exports = {
         }
 
         if (!await isExistingModule(module)) {
-            console.log(`Unrecognized module '${module}'.`);
-            process.exit(1);
+            unrecognized.module(module);
         }
 
         if (!chapter) {
@@ -108,8 +108,7 @@ module.exports = {
         }
 
         if (!await isExistingChapter(module, chapter)) {
-            console.log(`Unrecognized chapter '${chapter}'.`);
-            process.exit(1);
+            unrecognized.chapter(chapter);
         }
 
         const { value } = await chapterFrom(module)(chapter);
@@ -120,8 +119,7 @@ module.exports = {
         }
 
         if (!await isExistingStep(module, chapter, step)) {
-            console.log(`Unrecognized step '${step}'.`);
-            process.exit(1);
+            unrecognized.step(step);
         }
 
         await addCommandToBranch(`${value}.${step}`, command, false, cwd, label);

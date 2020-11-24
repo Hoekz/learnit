@@ -2,6 +2,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const simpleGit = require('simple-git');
 const { mapCourse, isGitRepo } = require('../common/course');
+const { unrecognized } = require('../common/errors');
 
 const git = simpleGit();
 
@@ -74,8 +75,7 @@ module.exports = {
 
             for (const module of modules) {
                 if (!moduleBranchesInCourse.includes(module) && !moduleNamesInCourse.includes(module)) {
-                    console.log(`Unrecognized module '${module}'. Either use the branch name or title of the module.`);
-                    process.exit();
+                    unrecognized.module(module);
                 }
             }
 
