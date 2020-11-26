@@ -2,7 +2,9 @@ const fs = require('fs').promises;
 const path = require('path');
 const simpleGit = require('simple-git');
 const { mapCourse, isGitRepo } = require('../common/course');
-const { unrecognized } = require('../common/errors');
+const { unrecognized, missing } = require('../common/errors');
+const { chapterToBranch } = require('../common/utils');
+const { isExistingModule, getModule, setBranchValue } = require('./git-helpers');
 
 const git = simpleGit();
 
@@ -69,19 +71,31 @@ module.exports = {
         async command({ modules, onlyShowOnComplete }) {
             const course = await mapCourse();
             const moduleBranchesInCourse = course.map(entry => entry.value);
-            const moduleNamesInCourse = course.map(entry => entry.name);
 
             modules = modules || moduleBranchesInCourse;
 
             for (const module of modules) {
-                if (!moduleBranchesInCourse.includes(module) && !moduleNamesInCourse.includes(module)) {
+                if (!(await isExistingModule(module))) {
                     unrecognized.module(module);
                 }
             }
 
-            // TODO: confirm all modules listed have a summary
-            // TODO: merge all modules listed into branch
-            // TODO: add show on complete flag if necessary
+            const toMerge = await Promise.all(modules.map(getModule));
+
+            for (const module of toMerge) {
+                if (!(await isExistingBranch(chapterToBranch(module.value, 'summary')))) {
+                    missing.branch(chapterToBranch(module, 'summary'));
+                }
+            }
+
+            const newBranch = 'summary';
+            await git.checkoutBranch(newBranch, 'master');
+
+            for (const module of toMerge) {
+                await git.mergeFromTo(chapterToBranch(module.value, 'summary'), newBranch);
+            }
+
+            await setBranchValue(newBranch, 'require-complete', !!onlyShowOnComplete);
         }
     }
 };

@@ -9,6 +9,14 @@ unrecognized.chapter = unrecognized.bind(null, 'chapter');
 unrecognized.step = unrecognized.bind(null, 'step');
 unrecognized.arg = unrecognized.bind(null, 'argument');
 
+const missing = (type, value) => {
+    console.error(`Cannot find ${type} matching '${value}'.`);
+    process.exit(1);
+};
+
+missing.branch = missing.bind(null, 'branch');
+
 module.exports = {
     unrecognized,
+    missing,
 };
