@@ -1,7 +1,7 @@
 const simpleGit = require('simple-git');
 const { getState } = require('../common/course');
 const { unrecognized } = require('../common/errors');
-const { chapterFrom, isExistingModule, isExistingChapter, getBranchConfig, getModule } = require('./git-helpers');
+const { chapterFrom, isExistingModule, isExistingChapter, getBranchConfig } = require('./git-helpers');
 
 const git = simpleGit();
 
@@ -45,13 +45,13 @@ module.exports = {
 
             label = label || (await chapterFrom(module)(chapter).steps.length);
 
-            const { cwd } = await getBranchConfig((await getModule(module)).value);
+            const { cwd } = await getBranchConfig.module(module);
 
             await git.commit(`step: ${label}`, [cwd || '.']);
         },
     },
     update: {
-        description: 'Allows for updating of the last committed step.',
+        description: 'Allows for updating of the last committed step or save point.',
         args: {},
         async command() {
             const { module, chapter } = await getState();
@@ -61,7 +61,7 @@ module.exports = {
                 process.exit(1);
             }
 
-            const { cwd } = await getBranchConfig((await getModule(module)).value);
+            const { cwd } = await getBranchConfig.module(module);
 
             await git.add([cwd || '.']);
             await git.raw(['commit', '--amend', '--no-edit']);

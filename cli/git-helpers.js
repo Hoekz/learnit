@@ -78,6 +78,11 @@ const getBranchConfig = async (branch) => {
     return config;
 };
 
+getBranchConfig.module = async (module) => {
+    const { value } = await getModule(module);
+    return getBranchConfig(value);
+};
+
 module.exports = {
     getBranchConfig, setBranchValue, setBranchDescription,
     isExistingModule, getModule,

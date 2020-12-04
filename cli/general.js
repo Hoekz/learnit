@@ -1,4 +1,6 @@
 const simpleGit = require('simple-git');
+const { getState } = require('../common/course');
+const { getBranchConfig } = require('./git-helpers');
 
 const git = simpleGit();
 
@@ -14,7 +16,11 @@ module.exports = {
             },
         },
         async command({ message }) {
-            // TODO: implement save
+            const { module } = await getState();
+
+            const { cwd } = module ? await getBranchConfig.module(module) : {};
+
+            await git.commit(`save: ${message || (new Date()).toLocaleString()}`, [cwd || '.']);
         }
     },
     upload: {
