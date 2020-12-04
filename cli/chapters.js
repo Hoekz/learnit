@@ -1,9 +1,10 @@
 const simpleGit = require('simple-git');
 const { getState } = require('../common/course');
+const { unrecognized } = require('../common/errors');
 const { chapterToBranch, moduleToBranch } = require('../common/utils');
 const {
     nextChapterIndex,
-    getBranchConfig, setBranchValue, setBranchDescription
+    getBranchConfig, setBranchValue, setBranchDescription, chapterFrom
 } = require('./git-helpers');
 
 const git = simpleGit();
@@ -74,10 +75,81 @@ module.exports = {
         },
     },
     delete: {
-        description: '',
-        args: {},
-        async command() {
+        description: 'Removes a chapter from a module.',
+        args: {
+            chapter: {
+                description: 'The chapter to delete, defaults to current.',
+                type: 'STR',
+                named: false,
+                optional: true,
+            },
+            module: {
+                description: 'The module containing the chapter, defaults to current.',
+                type: 'STR',
+                named: true,
+                hint: '<module>',
+                optional: true,
+            },
+            force: {
+                description: 'Bypasses asking for confirmation that the module should be deleted.',
+                type: 'BOOL',
+                named: true,
+                optional: true,
+            },
+            noRemote: {
+                description: 'Keep remote versions of branches.',
+                type: 'BOOL',
+                named: true,
+                optional: true,
+            },
+        },
+        async command({ chapter, module, force, noRemote }) {
             // TODO: implement deletion of chapter
+            const state = await getState();
+
+            if (!module) {
+                module = state.module;
+            }
+
+            if (!module) {
+                console.error('You are not in a module or did not provide a module.');
+                process.exit(1);
+            }
+
+            if (!chapter) {
+                chapter = state.chapter;
+            }
+
+            if (!chapter) {
+                console.error('You are not in a chapter or did not provide a chapter to be deleted.');
+                process.exit(1);
+            }
+
+            const chapterDetails = await chapterFrom(module)(chapter);
+
+            if (!chapterDetails) {
+                unrecognized.chapter(chapter);
+            }
+
+            if (!force) {
+                const confirm = (await inquirer.prompt({
+                    type: 'confirm',
+                    name: 'value',
+                    default: false,
+                    message: `Are you sure you want to delete chapter '${chapter}'?`
+                })).value;
+
+                if (!confirm) {
+                    process.exit();
+                }
+            }
+
+            const branch = chapterDetails.value;
+            await git.deleteLocalBranch(branch, true);
+
+            if (!noRemote) {
+                await git.push('origin', ['--delete', branch]);
+            }
         },
     },
     finish: {
