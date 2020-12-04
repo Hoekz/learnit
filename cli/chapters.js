@@ -73,6 +73,13 @@ module.exports = {
             }
         },
     },
+    delete: {
+        description: '',
+        args: {},
+        async command() {
+            // TODO: implement deletion of chapter
+        },
+    },
     finish: {
         description: 'Designates a chapter as completed and optionally merges it back into the module branch.',
         args: {

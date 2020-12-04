@@ -56,6 +56,13 @@ module.exports = {
             }
         },
     },
+    delete: {
+        description: '',
+        args: {},
+        async command() {
+            // TODO: implement deletion of module
+        },
+    },
     summarize: {
         description: 'Creates a summary of a module. Defaults to summarizing all chapters.',
         args: {

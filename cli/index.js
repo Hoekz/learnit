@@ -124,18 +124,24 @@ const helpCommand = {
 
 const writerCommands = {
     'init': courses.create,
-    'create': {
+    'new': {
         'module': modules.create,
         'chapter': chapters.create,
         'step': steps.create,
         'command': createCommand,
     },
-    'edit': {
-        'step': steps.edit,
+    'update': {
+        'step': steps.update,
+    },
+    'revert': {
+        'step': steps.revert,
+    },
+    'delete': {
+        'module': modules.delete,
+        'chapter': chapters.delete,
     },
     'finish': {
         'chapter': chapters.finish,
-        // 'step': steps.finish,
     },
     'summarize': {
         'chapter': chapters.summarize,

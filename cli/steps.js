@@ -1,6 +1,9 @@
+const simpleGit = require('simple-git');
 const { getState } = require('../common/course');
 const { unrecognized } = require('../common/errors');
-const { nextChapterIndex, chapterFrom, isExistingModule, isExistingChapter } = require('./git-helpers');
+const { chapterFrom, isExistingModule, isExistingChapter, getBranchConfig, getModule } = require('./git-helpers');
+
+const git = simpleGit();
 
 module.exports = {
     create: {
@@ -41,39 +44,48 @@ module.exports = {
             }
 
             label = label || (await chapterFrom(module)(chapter).steps.length);
-            // TODO: default label to current index
-            // TODO: pull in current module and chapter
-            // TODO: limit adding to only module cwd
-            // TODO: create commit
+
+            const { cwd } = await getBranchConfig((await getModule(module)).value);
+
+            await git.commit(`step: ${label}`, [cwd || '.']);
         },
     },
-    edit: {
-        description: 'Allows for editing of the last committed step.',
+    update: {
+        description: 'Allows for updating of the last committed step.',
+        args: {},
+        async command() {
+            const { module, chapter } = await getState();
+
+            if (!chapter) {
+                console.error('You must be navigated to a chapter to update the last step.');
+                process.exit(1);
+            }
+
+            const { cwd } = await getBranchConfig((await getModule(module)).value);
+
+            await git.add([cwd || '.']);
+            await git.raw(['commit', '--amend', '--no-edit']);
+        },
+    },
+    revert: {
+        description: 'Allows for reverting the previously committed step.',
         args: {
-            module: {
-                description: 'The module in which to edit the step.',
-                type: 'STR',
+            soft: {
+                description: 'Undo the saving of the step, but not the content.',
+                type: 'BOOL',
                 named: true,
-                hint: '<module_branch_or_name>',
                 optional: true,
-            },
-            chapter: {
-                description: 'The chapter in which to edit the step.',
-                type: 'STR',
-                named: true,
-                hint: '<chapter_branch_or_name>',
-                optional: true,
-            },
+            }
         },
-        async command({ module, chapter }) {
-            // TODO: pull in current module and chapter
-            // TODO:limit adding to only module cwd
-            // TODO: amend commit
+        async command({ soft }) {
+            const { step } = await getState();
+
+            if (!step) {
+                console.error('You must be navigated to a step to revert it.');
+                process.exit(1);
+            }
+
+            await git.reset(soft ? 'soft' : 'hard', ['HEAD~1']);
         },
-    },
-    // finish: {
-    //     description: 'When editing a step, it is necessary to mark the changes as finished to proceed.',
-    //     args: {},
-    //     async command() {},
-    // },
+    }
 };
