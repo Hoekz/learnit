@@ -9,6 +9,7 @@ const instructor = require('../instructor');
 const output = require('../output');
 const { snake, underscore } = require('./utils');
 const { unrecognized } = require('../common/errors');
+const general = require('./general');
 
 const parseArg = (type, str) => {
     switch (type) {
@@ -148,6 +149,7 @@ const writerCommands = {
         'module': modules.summarize,
         'chapter': chapters.summarize,
     },
+    ...general,
     'help': helpCommand,
 };
 
