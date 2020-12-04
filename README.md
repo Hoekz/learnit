@@ -251,10 +251,9 @@ For creators:
  - `.learnitignore` - not started, eventually want multiple directory support, support module or chapter annotations
  - `.SCRIPT.md` - not started, prompt when creating module, chapter, and step, associate with module
  - mark course/module/chapter as complete - started, have mechanism for keeping track of progress
- - `learnit save` - not started, create a commit that is not a step, etc.
- - `learnit upload` - not started, equivalent to `git push --force-with-lease`
+ - `learnit save` - completed.
+ - `learnit upload` - completed.
  - `learnit rebase` - not started, rebase all branches intelligently (for changes to master that need to be everywhere)
- - add cwd to creation of modules to allow scoping of commits, running of commands
  - `learnit squash-scripts` - not started, collapses all changes to scripts to single commit so it does not change dynamically.
 
 For consumers:
