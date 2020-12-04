@@ -263,7 +263,7 @@ For consumers:
  - `learnit output` - mostly done, watches location and starts/stops commands as necessary, reporting their output
  - `learnit reset` - not started, erases all progress, resets to `master`
  - `learnit bookmark` - not started, allows user to set up a quick return point
- - `learnit annotate` - not started, allows user to save changes they made`
+ - `learnit annotate` - not started, allows user to save changes they made
  - `learnit settings` - not started, allows user to configure setup, such as soft stepping so that deltas are visible to outside programs.
 
 For both:

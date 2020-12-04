@@ -5,7 +5,7 @@ const { moduleToBranch, branchToModule, chapterToBranch } = require('../common/u
 const {
     isExistingModule, isExistingChapter,
     chapterFrom,
-    setBranchValue, setBranchDescription
+    setBranchValue, setBranchDescription, getModule
 } = require('./git-helpers');
 
 const git = simpleGit();
@@ -57,10 +57,60 @@ module.exports = {
         },
     },
     delete: {
-        description: '',
-        args: {},
-        async command() {
-            // TODO: implement deletion of module
+        description: 'Removes a module from the course.',
+        args: {
+            module: {
+                description: 'The module to delete, defaults to current.',
+                type: 'STR',
+                named: false,
+                optional: true,
+            },
+            force: {
+                description: 'Bypasses asking for confirmation that the module should be deleted.',
+                type: 'BOOL',
+                named: true,
+                optional: true,
+            },
+            noRemote: {
+                description: 'Keep remote versions of branches.',
+                type: 'BOOL',
+                named: true,
+                optional: true,
+            },
+        },
+        async command({ module, force, noRemote }) {
+            if (!module) {
+                const state = await getState();
+                module = state.module;
+            }
+
+            if (!module) {
+                console.error('You are not in a module or did not provide a module to be deleted.');
+                process.exit(1);
+            }
+
+            const moduleDetails = await getModule(module);
+
+            if (!moduleDetails) {
+                unrecognized.module(module);
+            }
+
+            if (!force) {
+                const confirm = (await inquirer.prompt({
+                    type: 'confirm',
+                    name: 'value',
+                    default: false,
+                    message: `Are you sure you want to delete module '${module}' and all its chapters?`
+                })).value;
+
+                if (!confirm) {
+                    process.exit();
+                }
+            }
+
+            // TODO: find all branches to delete
+            // TODO: delete all branches
+            // TODO: delete all remote branches
         },
     },
     summarize: {
