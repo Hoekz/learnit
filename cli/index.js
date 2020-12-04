@@ -37,7 +37,7 @@ const processCommand = ({ command, args }, argv) => {
             }
 
         } else if (unnamedArgs.length) {
-            const [key, options] = unnamedArgs.pop();
+            const [key, options] = unnamedArgs.shift();
             parsedArgs[key] = parseArg(options.type, arg);
         } else {
             console.log('Too many unnamed arguments supplied.');
@@ -166,7 +166,7 @@ if (!command || !(command in commands)) {
 }
 
 if (!rest.length) {
-    if (commands[command].command) {
+    if ('command' in commands[command] && commands[command].command instanceof Function) {
         commands[command].command({});
     } else {
         help({ command });
