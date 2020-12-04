@@ -108,9 +108,12 @@ module.exports = {
                 }
             }
 
-            // TODO: find all branches to delete
-            // TODO: delete all branches
-            // TODO: delete all remote branches
+            const branches = [moduleDetails.value, ...moduleDetails.chapters.map(chapter => chapter.value)];
+            await git.deleteLocalBranches(branches, true);
+
+            if (!noRemote) {
+                await git.push('origin', ['--delete', ...branches]);
+            }
         },
     },
     summarize: {

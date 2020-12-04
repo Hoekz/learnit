@@ -242,7 +242,7 @@ For creators:
  - `learnit new command` - completed.
  - `learnit update step` - completed.
  - `learnit revert step` - completed.
- - `learnit delete module` - not started.
+ - `learnit delete module` - completed.
  - `learnit delete chapter` - not started.
  - `learnit finish chapter` - completed.
  - `learnit summarize course` - completed, reader needs update.
