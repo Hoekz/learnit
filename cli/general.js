@@ -32,9 +32,27 @@ module.exports = {
                 named: false,
                 optional: true,
             },
+            soft: {
+                description: 'Removes the --force-with-lease flag.',
+                type: 'BOOL',
+                named: true,
+                optional: true,
+            }
         },
-        async command({ to }) {
-            // TODO: implement upload
+        async command({ to, soft }) {
+            const remotes = await git.getRemotes();
+            const hasOrigin = remotes.some(r => r.name === 'origin');
+
+            if (!hasOrigin && !to) {
+                console.error(`You have not specified an origin. Provide a remote url using 'learnit upload <url>'. This is only required once.`);
+                process.exit(1);
+            }
+
+            if (!hasOrigin) {
+                await git.addRemote('origin', to);
+            }
+
+            await git.push(soft ? null : ['--force-with-lease']);
         }
     },
     rebase: {
