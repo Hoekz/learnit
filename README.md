@@ -54,7 +54,7 @@ CLI provides all the tools you should need to create a course.
 You can add a module to a course with the command:
 
 ```
-learnit create module <module_branch_or_name> [--name=<module_name>] [--cwd=<directory>]
+learnit new module <module_branch_or_name> [--name=<module_name>] [--cwd=<directory>]
 ```
 
 You can provide the module name as a branch (`module-module-name`) or the name (`Module Name`),
@@ -69,7 +69,7 @@ folder to be committed and will be the assumed directory to run any commands in.
 You can add a chapter to a course with the command:
 
 ```
-learnit create chapter [chapter_title] [--module=<module_branch_or_name>] [--merge=[true]] [--base=<module>]
+learnit new chapter [chapter_title] [--module=<module_branch_or_name>] [--merge=[true]] [--base=<module>]
 ```
 
 Chapters are automatically incremented up from the last, starting at `01`. You must be currently
@@ -92,7 +92,7 @@ ready to start showing the user code changes, you want to create your first `ste
 You can add a step to a course with the command:
 
 ```
-learnit create step [label] [--module=<module_branch_or_name>] [--chapter=<chapter_branch_or_name>]
+learnit new step [label] [--module=<module_branch_or_name>] [--chapter=<chapter_branch_or_name>]
 ```
 
 Steps can optionally be labeled for better tracking and editing. If you are not already on a
@@ -215,7 +215,7 @@ duplicated output.
 Adding a command to run is very easy:
 
 ```
-learnit create command <command> [--module=<module>] [--chapter=<chapter>] [--step=<step>] [--reload-on-step=[false]] [--cwd=[directory]]
+learnit new command <command> <--at-current> [--module=<module>] [--chapter=<chapter>] [--step=<step>] [--reload-on-step=[false]] [--cwd=[directory]]
 ```
 
 Depending on where you are currently navigated to and where you want to run the command, you will
@@ -236,11 +236,18 @@ shown in the delta. By default, any `.SCRIPT.md`, `.learnitignore` and progress 
 For creators:
 
  - `learnit init` - completed, might need to have it initialize some more things though.
- - `learnit create module` - completed.
- - `learnit summarize module` - mostly done, still need reader to respect flag and summaries.
- - `learnit create chapter` - completed.
- - `learnit summarize chapter` - mostly done, still need reader to respect flag and summaries.
- - `learnit create step` - started.
+ - `learnit new module` - completed.
+ - `learnit new chapter` - completed.
+ - `learnit new step` - completed.
+ - `learnit new command` - completed.
+ - `learnit update step` - completed.
+ - `learnit revert step` - completed.
+ - `learnit delete module` - not started.
+ - `learnit delete chapter` - not started.
+ - `learnit finish chapter` - completed.
+ - `learnit summarize course` - completed, reader needs update.
+ - `learnit summarize module` - completed, reader needs update.
+ - `learnit summarize chapter` - completed, reader needs update.
  - `.learnitignore` - not started, eventually want multiple directory support, support module or chapter annotations
  - `.SCRIPT.md` - not started, prompt when creating module, chapter, and step, associate with module
  - mark course/module/chapter as complete - started, have mechanism for keeping track of progress
@@ -253,7 +260,7 @@ For creators:
 For consumers:
 
  - `learnit start`- started, navigates course, needs to print script
- - `learnit output` - not started, watches location and starts/stops commands as necessary, reporting their output
+ - `learnit output` - mostly done, watches location and starts/stops commands as necessary, reporting their output
  - `learnit reset` - not started, erases all progress, resets to `master`
  - `learnit bookmark` - not started, allows user to set up a quick return point
  - `learnit annotate` - not started, allows user to save changes they made`

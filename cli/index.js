@@ -144,9 +144,9 @@ const writerCommands = {
         'chapter': chapters.finish,
     },
     'summarize': {
-        'chapter': chapters.summarize,
-        'module': modules.summarize,
         'course': courses.summarize,
+        'module': modules.summarize,
+        'chapter': chapters.summarize,
     },
     'help': helpCommand,
 };
