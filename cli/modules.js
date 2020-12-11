@@ -140,10 +140,10 @@ module.exports = {
                 console.log('Cannot create module summary when not in a module.');
                 process.exit(1);
             }
-            
-            const { actualChapters: chapters } = await getModule(module);
 
-            chapters = chapters || actualChapters.map(chapter => chapter.value);
+            const actualModule = await getModule(module);
+
+            chapters = chapters || actualModule.chapters.map(chapter => chapter.value);
 
             for (const chapter of chapters) {
                 if (!await isExistingChapter(module, chapter)) {

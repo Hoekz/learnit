@@ -20,7 +20,8 @@ module.exports = {
 
             const { cwd } = module ? await getBranchConfig.module(module) : {};
 
-            await git.commit(`save: ${message || (new Date()).toLocaleString()}`, [cwd || '.']);
+            await git.add(cwd || process.cwd());
+            await git.commit(`save: ${message || (new Date()).toLocaleString()}`, []);
         }
     },
     upload: {
