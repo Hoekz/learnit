@@ -4,7 +4,7 @@ const { unrecognized } = require('../common/errors');
 const { chapterToBranch, moduleToBranch } = require('../common/utils');
 const {
     nextChapterIndex,
-    getBranchConfig, setBranchValue, setBranchDescription, chapterFrom
+    getBranchConfig, setBranchValue, setBranchDescription, chapterFrom,
 } = require('./git-helpers');
 
 const git = simpleGit();
@@ -224,6 +224,36 @@ module.exports = {
             await git.checkoutBranch(newBranch, first.hash);
             await git.mergeFromTo(branch, newBranch);
             await setBranchValue(newBranch, 'require-complete', !!onlyShowOnComplete);
+        },
+    },
+    goto: {
+        description: 'Navigates to an existing chapter.',
+        args: {
+            chapter: {
+                description: 'The branch or name of the chapter to navigate to.',
+                type: 'STR',
+                named: false,
+                optional: false,
+            },
+            module: {
+                description: 'The branch or name of the module containing the chapter.',
+                type: 'STR',
+                named: true,
+                hint: '<module>',
+                optional: true,
+            },
+        },
+        async command({ module, chapter }) {
+            module = module || (await getState()).module;
+
+            const target = (await chapterFrom(module)(chapter));
+
+            if (target) {
+                git.checkout(target.value);
+            } else {
+                console.log(`Unable to find match for '${chapter}'.`);
+                process.exit(1);
+            }
         },
     },
 };

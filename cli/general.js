@@ -2,6 +2,10 @@ const simpleGit = require('simple-git');
 const { getState } = require('../common/course');
 const { getBranchConfig } = require('./git-helpers');
 
+const courses = require('./courses');
+const modules = require('./modules');
+const chapters = require('./chapters');
+
 const git = simpleGit();
 
 module.exports = {
@@ -69,5 +73,10 @@ module.exports = {
         async command({ module }) {
             // TODO: implement rebase
         }
+    },
+    goto: {
+        home: courses.goto,
+        module: modules.goto,
+        chapter: chapters.goto,
     },
 };

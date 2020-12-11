@@ -97,5 +97,12 @@ module.exports = {
 
             await setBranchValue(newBranch, 'require-complete', !!onlyShowOnComplete);
         }
-    }
+    },
+    goto: {
+        description: 'Navigates back to the start of the course.',
+        args: {},
+        async command() {
+            await git.checkout('master');
+        }
+    },
 };

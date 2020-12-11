@@ -56,8 +56,6 @@ const mapCourse = async () => {
         }
     }
 
-    await courseMap.save();
-
     return courseMap.value;
 };
 

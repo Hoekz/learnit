@@ -163,4 +163,32 @@ module.exports = {
             await setBranchValue(newBranch, 'require-complete', !!onlyShowOnComplete);
         },
     },
+    goto: {
+        description: 'Navigates to an existing module.',
+        args: {
+            module: {
+                description: 'The branch or name of the module to navigate to.',
+                type: 'STR',
+                named: false,
+                optional: false,
+            },
+            chapter: {
+                description: 'The branch or name of the chapter inside the module to navigate to.',
+                type: 'STR',
+                named: true,
+                hint: '<chapter>',
+                optional: true,
+            },
+        },
+        async command({ module, chapter }) {
+            const target = (await (chapter ? chapterFrom(module)(chapter) : getModule(module)));
+
+            if (target) {
+                await git.checkout(target.value);
+            } else {
+                console.log(`Unable to find match for '${chapter || module}'.`);
+                process.exit(1);
+            }
+        },
+    },
 };

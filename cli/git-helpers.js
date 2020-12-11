@@ -1,6 +1,5 @@
 const simpleGit = require('simple-git');
-const { getState, mapCourse } = require('../common/course');
-const { chapterToBranch, moduleToBranch } = require('../common/utils');
+const { mapCourse } = require('../common/course');
 
 const git = simpleGit();
 
