@@ -175,7 +175,7 @@ if (!rest.length) {
         process.exit();
     }
 } else {
-    if (commands[command].command) {
+    if (commands[command].command instanceof Function) {
         processCommand(commands[command], rest);
     } else {
         processCommand(commands[command][rest[0]], rest.slice(1));

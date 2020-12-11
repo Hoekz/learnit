@@ -9,7 +9,7 @@ async function next() {
 
     if (!state.module) {
         const module = await prompter.chooseModule();
-        return await navigate.setModule(module);
+        return module ? await navigate.setModule(module) : null;
     }
 
     if (!state.chapter) {

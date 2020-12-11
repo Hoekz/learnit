@@ -1,7 +1,11 @@
-const { fs: promises, watch } = require('fs');
+const { promises: fs, watch } = require('fs');
 const path = require('path');
 
 const directory = process.cwd();
+
+async function ensureLearnitDirectory() {
+    await fs.mkdir(path.join(directory, '.learnit'));
+}
 
 module.exports = class Saveable {
     constructor(name, defaultValue = {}) {
@@ -9,9 +13,11 @@ module.exports = class Saveable {
         this.listeners = [];
         this.locked = false;
         this.watching = false;
+        this.hasFile = false;
 
         try {
             this.value = require(this.file);
+            this.hasFile = true;
         } catch(e) {
             this.value = defaultValue;
         }
@@ -19,7 +25,9 @@ module.exports = class Saveable {
 
     async save() {
         this.locked = true;
+        if (!this.hasFile) await ensureLearnitDirectory();
         await fs.writeFile(this.file, JSON.stringify(this.value), 'utf-8');
+        this.hasFile = true;
         this.locked = false;
     }
 

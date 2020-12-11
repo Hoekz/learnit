@@ -5,7 +5,7 @@ const { branchToModule, branchToChapter, moduleToBranch, chapterToBranch } = req
 
 const git = simpleGit();
 
-const courseMap = new Saveable('course', null);
+const courseMap = { value: null };
 const state = new Saveable('state', )
 
 const getBranches = async (prefix, describe = identity) => {

@@ -248,6 +248,8 @@ For creators:
  - `learnit summarize course` - completed, reader needs update.
  - `learnit summarize module` - completed, reader needs update.
  - `learnit summarize chapter` - completed, reader needs update.
+ - `learnit goto module` - not started.
+ - `learnit goto chapter` - not started.
  - `.learnitignore` - not started, eventually want multiple directory support, support module or chapter annotations
  - `.SCRIPT.md` - not started, prompt when creating module, chapter, and step, associate with module
  - mark course/module/chapter as complete - started, have mechanism for keeping track of progress

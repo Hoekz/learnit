@@ -7,7 +7,8 @@ const prompt = (description, options) => {
         console.log(description, 'has no choices');
         return { value: null };
     }
-    // console.clear();
+
+    console.clear();
 
     if (description instanceof Array) {
         description.forEach(line => console.log(line));
@@ -25,6 +26,11 @@ const prompt = (description, options) => {
 const chooseModule = async () => {
     const modules = await course.getModules();
 
+    if (!modules.length) {
+        console.log('There are no modules in this course, exiting.');
+        return null;
+    }
+
     return (await prompt('Welcome to the course!', {
         message: 'Choose a Module',
         choices: modules,
@@ -35,7 +41,7 @@ const chooseChapter = async (module) => {
     const chapters = await course.getChapters(module);
 
     return (await prompt(module, {
-        message: 'Choose a Chapter',
+        message: chapters.length ? 'Choose a Chapter' : 'There are no chapters in this module.',
         choices: [...chapters, { key: 'b', name: 'Back to Modules', value: 'back' }],
     })).value;
 };
