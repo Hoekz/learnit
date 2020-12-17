@@ -21,7 +21,7 @@ Course
 |-- Module 2
 ```
 
-In reality, `Course` represents the `master` branch of a git repo, a module represents a
+In reality, `Course` represents the `main` branch of a git repo, a module represents a
 branch with the pattern `module-{module}`, a chapter represents a branch with the
 pattern `{module}-chapter-{chapter}`, and a step represents a commit on a chapter branch.
 There are particular commit messages that mark the starting and stopping commits of a
@@ -256,14 +256,14 @@ For creators:
  - mark course/module/chapter as complete - started, have mechanism for keeping track of progress
  - `learnit save` - completed.
  - `learnit upload` - completed.
- - `learnit rebase` - not started, rebase all branches intelligently (for changes to master that need to be everywhere)
+ - `learnit rebase` - not started, rebase all branches intelligently (for changes to `main` that need to be everywhere)
  - `learnit squash-scripts` - not started, collapses all changes to scripts to single commit so it does not change dynamically.
 
 For consumers:
 
  - `learnit start`- started, navigates course, needs to print script
  - `learnit output` - mostly done, watches location and starts/stops commands as necessary, reporting their output
- - `learnit reset` - not started, erases all progress, resets to `master`
+ - `learnit reset` - not started, erases all progress, resets to `main`
  - `learnit bookmark` - not started, allows user to set up a quick return point
  - `learnit annotate` - not started, allows user to save changes they made
  - `learnit settings` - not started, allows user to configure setup, such as soft stepping so that deltas are visible to outside programs.

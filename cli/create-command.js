@@ -91,7 +91,7 @@ module.exports = {
             })).value;
             
             if (confirm) {
-                await addCommandToBranch('master', command, reloadOnStep, cwd, label);
+                await addCommandToBranch('main', command, reloadOnStep, cwd, label);
             }
 
             process.exit();

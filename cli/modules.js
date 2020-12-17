@@ -49,7 +49,7 @@ module.exports = {
                 process.exit(1);
             }
 
-            await git.checkoutBranch(branch, 'master');
+            await git.checkoutBranch(branch, 'main');
             await setBranchDescription(branch, name);
             if (cwd) {
                 await setBranchValue(branch, 'cwd', cwd);

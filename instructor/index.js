@@ -16,7 +16,7 @@ async function next() {
         const chapter = await prompter.chooseChapter(state.module);
 
         if (chapter === 'back') {
-            return await navigate.goTo('master');
+            return await navigate.goTo('main');
         }
 
         return await navigate.setChapter(state.module, chapter);

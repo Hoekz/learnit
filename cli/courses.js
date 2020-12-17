@@ -28,6 +28,23 @@ const ensureGitIgnore = async () => {
     }
 };
 
+const ensureMain = async () => {
+    const { all } = await git.branchLocal();
+    if (all.includes('master') && !all.includes('main')) {
+        console.log('Renaming master to main...');
+        await git.branch(['-m', 'master', 'main']);
+    } else if (!all.includes('main') && !all.includes('master')) {
+        console.log('No master or main branch found, creating main...');
+        await git.raw(['checkout', '-b', 'main']);
+    }
+
+    try {
+        await git.checkout('main');
+    } catch(e) {
+        // no catch needed, only happens when the repo is empty.
+    }
+}
+
 module.exports = {
     create: {
         description: 'Initializes a course. If you are already in a git repo, it will be used.',
@@ -36,6 +53,7 @@ module.exports = {
             const dir = path.basename(process.cwd());
             if (await isGitRepo()) {
                 console.log(`A repo already exists in ${dir}, checking .gitignore...`);
+                await ensureMain();
                 await ensureGitIgnore();
             } else {
                 console.log(`No repo detected, creating a course repo in ${dir}.`);
@@ -43,6 +61,7 @@ module.exports = {
                 try {
                     await git.init();
                     await ensureGitIgnore();
+                    await git.branch(['-m', 'master', 'main']);
                 } catch (e) {
                     console.log('Unable to fully create repo:');
                     console.log(e);
@@ -89,7 +108,7 @@ module.exports = {
             }
 
             const newBranch = 'summary';
-            await git.checkoutBranch(newBranch, 'master');
+            await git.checkoutBranch(newBranch, 'main');
 
             for (const module of toMerge) {
                 await git.mergeFromTo(chapterToBranch(module.value, 'summary'), newBranch);
@@ -102,7 +121,7 @@ module.exports = {
         description: 'Navigates back to the start of the course.',
         args: {},
         async command() {
-            await git.checkout('master');
+            await git.checkout('main');
         }
     },
 };

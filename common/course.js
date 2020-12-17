@@ -63,7 +63,7 @@ const getState = async () => {
     const { current } = await git.status();
     const config = await git.listConfig();
     
-    if (current === 'master') {
+    if (current === 'main') {
         return { module: null, chapter: null, commit: null };
     }
     
