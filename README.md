@@ -248,7 +248,7 @@ For creators:
  - `learnit summarize course` - completed, reader needs update.
  - `learnit summarize module` - completed, reader needs update.
  - `learnit summarize chapter` - completed, reader needs update.
- - `learnit goto home` - completed. May add confirmation of discarding changes.
+ - `learnit goto main` - completed. May add confirmation of discarding changes.
  - `learnit goto module` - completed. ""
  - `learnit goto chapter` - completed. ""
  - `learnit list modules` - completed.

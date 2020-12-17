@@ -118,7 +118,7 @@ module.exports = {
         }
     },
     goto: {
-        description: 'Navigates back to the start of the course.',
+        description: 'Navigates back to the start (main branch) of the course.',
         args: {},
         async command() {
             await git.checkout('main');

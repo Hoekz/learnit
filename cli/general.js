@@ -75,7 +75,7 @@ module.exports = {
         }
     },
     goto: {
-        home: courses.goto,
+        main: courses.goto,
         module: modules.goto,
         chapter: chapters.goto,
     },
