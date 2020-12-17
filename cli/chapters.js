@@ -1,10 +1,10 @@
 const simpleGit = require('simple-git');
-const { getState } = require('../common/course');
+const { getState, mapCourse } = require('../common/course');
 const { unrecognized } = require('../common/errors');
 const { chapterToBranch, moduleToBranch } = require('../common/utils');
 const {
     nextChapterIndex,
-    getBranchConfig, setBranchValue, setBranchDescription, chapterFrom,
+    getBranchConfig, setBranchValue, setBranchDescription, chapterFrom, getModule,
 } = require('./git-helpers');
 
 const git = simpleGit();
@@ -253,6 +253,60 @@ module.exports = {
             } else {
                 console.log(`Unable to find match for '${chapter}'.`);
                 process.exit(1);
+            }
+        },
+    },
+    list: {
+        description: 'Show a list of chapters in a module.',
+        args: {
+            module: {
+                description: 'Module to list chapters of.',
+                type: 'STR',
+                named: true,
+                hint: '<module>',
+                optional: true,
+            },
+            branches: {
+                description: 'Show the branch name of each module as well.',
+                type: 'BOOL',
+                named: true,
+                optional: true,
+            }
+        },
+        async command({ branches, module }) {
+            const state = await getState();
+            const modules = await mapCourse();
+
+            if (!modules.length) {
+                console.log('No modules exist. Create a new module with `learnit new module <module>`.');
+                process.exit();
+            }
+
+            module = module || state.module;
+
+            function log(target, prefix = '') {
+                if (branches) {
+                    console.log(`${prefix}${target.name} (${target.value})`);
+                } else {
+                    console.log(prefix + target.name);
+                }
+            }
+
+            if (!module) {
+                console.log('Listing all modules and chapters...');
+                modules.forEach((module) => {
+                    log(module);
+                    module.chapters.forEach((chapter) => log(chapter, '\t'));
+                });
+            } else {
+                const { name, chapters } = await getModule(module);
+
+                if (chapters.length) {
+                    console.log(`Listing all chapters in ${name}...`);
+                    chapters.forEach(log);
+                } else {
+                    console.log(`No chapters in ${name}. Create a new chapter with \`learnit new chapter <chapter>\`.`);
+                }
             }
         },
     },

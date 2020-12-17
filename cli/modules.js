@@ -1,5 +1,5 @@
 const simpleGit = require('simple-git');
-const { getState } = require('../common/course');
+const { getState, mapCourse } = require('../common/course');
 const { unrecognized } = require('../common/errors');
 const { moduleToBranch, branchToModule, chapterToBranch } = require('../common/utils');
 const {
@@ -189,6 +189,32 @@ module.exports = {
                 console.log(`Unable to find match for '${chapter || module}'.`);
                 process.exit(1);
             }
+        },
+    },
+    list: {
+        description: 'Show a list of modules in the course.',
+        args: {
+            branches: {
+                description: 'Show the branch name of each module as well.',
+                type: 'BOOL',
+                named: true,
+                optional: true,
+            }
+        },
+        async command({ branches }) {
+            const modules = await mapCourse();
+
+            if (!modules.length) {
+                console.log('No modules exist. Create a new module with `learnit new module <module>`.');
+            }
+
+            modules.forEach((module) => {
+                if (branches) {
+                    console.log(`${module.name} (${module.value})`);
+                } else {
+                    console.log(module.name);
+                }
+            });
         },
     },
 };

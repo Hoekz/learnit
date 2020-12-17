@@ -251,8 +251,8 @@ For creators:
  - `learnit goto home` - completed. May add confirmation of discarding changes.
  - `learnit goto module` - completed. ""
  - `learnit goto chapter` - completed. ""
- - `learnit list modules` - not started.
- - `learnit list chapters` - not started.
+ - `learnit list modules` - completed.
+ - `learnit list chapters` - completed.
  - `.learnitignore` - not started, eventually want multiple directory support, support module or chapter annotations
  - `.SCRIPT.md` - not started, prompt when creating module, chapter, and step, associate with module
  - mark course/module/chapter as complete - started, have mechanism for keeping track of progress

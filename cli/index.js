@@ -131,6 +131,10 @@ const writerCommands = {
         'step': steps.create,
         'command': createCommand,
     },
+    'list': {
+        'modules': modules.list,
+        'chapters': chapters.list,
+    },
     'update': {
         'step': steps.update,
     },
