@@ -253,6 +253,7 @@ For creators:
  - `learnit goto chapter` - completed. ""
  - `learnit list modules` - completed.
  - `learnit list chapters` - completed.
+ - `learnit config` - completed.
  - `.learnitignore` - not started, eventually want multiple directory support, support module or chapter annotations
  - `.SCRIPT.md` - not started, prompt when creating module, chapter, and step, associate with module
  - mark course/module/chapter as complete - started, have mechanism for keeping track of progress

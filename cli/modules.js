@@ -1,4 +1,7 @@
+const { promises: fs } = require('fs');
+const path = require('path');
 const simpleGit = require('simple-git');
+const inquirer = require('inquirer');
 const { getState, mapCourse } = require('../common/course');
 const { unrecognized } = require('../common/errors');
 const { moduleToBranch, branchToModule, chapterToBranch } = require('../common/utils');
@@ -9,6 +12,8 @@ const {
 } = require('./git-helpers');
 
 const git = simpleGit();
+
+const ensureCwd = (cwd) => fs.mkdir(cwd, { recursive: true });
 
 module.exports = {
     create: {
@@ -52,8 +57,14 @@ module.exports = {
             await git.checkoutBranch(branch, 'main');
             await setBranchDescription(branch, name);
             if (cwd) {
+                await ensureCwd(cwd);
                 await setBranchValue(branch, 'cwd', cwd);
             }
+
+            const script = cwd ? path.join(cwd, branch + '.md') : branch + '.md';
+            await fs.writeFile(script, `# ${name}\n`, 'utf-8');
+            console.log(`Script started at ${script}`);
+            console.log('Edit the script file to provide a descriptive prompt of the content in the module.');
         },
     },
     delete: {
@@ -79,10 +90,9 @@ module.exports = {
             },
         },
         async command({ module, force, noRemote }) {
-            if (!module) {
-                const state = await getState();
-                module = state.module;
-            }
+            const state = await getState();
+
+            module = module || state.module;
 
             if (!module) {
                 console.error('You are not in a module or did not provide a module to be deleted.');
@@ -108,7 +118,15 @@ module.exports = {
                 }
             }
 
+            if (moduleDetails.name === state.module) {
+                await git.checkout('main');
+            }
+
             const branches = [moduleDetails.value, ...moduleDetails.chapters.map(chapter => chapter.value)];
+
+            console.log('Deleting branches:');
+            branches.forEach((branch) => console.log(`\t${branch}`));
+
             await git.deleteLocalBranches(branches, true);
 
             if (!noRemote) {

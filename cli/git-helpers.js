@@ -68,9 +68,13 @@ const getBranchConfig = async (branch) => {
     const configs = await git.listConfig();
     const config = {};
 
-    for (const [key, value] of Object.entries(configs['.git/config'])) {
+    if (!branch || !configs.files.includes('.git/config')) {
+        return config;
+    }
+    
+    for (const [key, value] of Object.entries(configs.values['.git/config'])) {
         if (key.startsWith(`learnit.${branch}`)) {
-            config[key.replace(`learnit.${branch}`, '')] = JSON.parse(value);
+            config[key.replace(`learnit.${branch}.`, '')] = JSON.parse(value);
         }
     }
 
@@ -82,8 +86,13 @@ getBranchConfig.module = async (module) => {
     return getBranchConfig(value);
 };
 
+const deleteBranchSettings = async (branch) => {
+    await git.raw('config', '--unset-all', `learnit.${branch}`);
+    await git.raw('config', '--unset', `branch.${branch}.description`);
+};
+
 module.exports = {
-    getBranchConfig, setBranchValue, setBranchDescription,
+    getBranchConfig, setBranchValue, setBranchDescription, deleteBranchSettings,
     isExistingModule, getModule,
     isExistingChapter, chapterFrom, nextChapterIndex,
     isExistingStep, lastStepFrom, stepFrom,

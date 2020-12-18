@@ -1,6 +1,6 @@
 const simpleGit = require('simple-git');
 const { getState } = require('../common/course');
-const { getBranchConfig } = require('./git-helpers');
+const { getBranchConfig, chapterFrom, getModule } = require('./git-helpers');
 
 const courses = require('./courses');
 const modules = require('./modules');
@@ -79,4 +79,24 @@ module.exports = {
         module: modules.goto,
         chapter: chapters.goto,
     },
+    config: {
+        description: 'Shows the configuration of the current branch.',
+        args: {},
+        async command() {
+            const { module, chapter } = await getState();
+
+            if (!module) {
+                printConfig('course', await getBranchConfig('main'));
+                process.exit();
+            }
+
+            const branch = (await (chapter ? chapterFrom(module)(chapter) : getModule(module))).value;
+            printConfig(chapter || module, await getBranchConfig(branch));
+        },
+    },
 };
+
+function printConfig(title, config) {
+    console.log(`Config values for ${title}:`);
+    Object.entries(config).forEach(([key, value]) => console.log(`\t${key}: ${JSON.stringify(value)}`));
+}
