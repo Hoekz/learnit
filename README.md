@@ -236,14 +236,14 @@ shown in the delta. By default, any `.SCRIPT.md`, `.learnitignore` and progress 
 For creators:
 
  - `learnit init` - completed, might need to have it initialize some more things though.
- - `learnit new module` - completed.
- - `learnit new chapter` - completed.
+ - `learnit new module` - completed. Need to automate first commit.
+ - `learnit new chapter` - completed. Need to automate first commit.
  - `learnit new step` - completed.
  - `learnit new command` - completed.
  - `learnit update step` - completed.
  - `learnit revert step` - completed.
- - `learnit delete module` - completed.
- - `learnit delete chapter` - completed.
+ - `learnit delete module` - completed. Need to delete config values.
+ - `learnit delete chapter` - completed. Need to delete config values.
  - `learnit finish chapter` - completed.
  - `learnit summarize course` - completed, reader needs update.
  - `learnit summarize module` - completed, reader needs update.
