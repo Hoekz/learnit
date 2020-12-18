@@ -255,8 +255,7 @@ For creators:
  - `learnit list chapters` - completed.
  - `learnit config` - completed.
  - `.learnitignore` - not started, eventually want multiple directory support, support module or chapter annotations
- - `.SCRIPT.md` - not started, prompt when creating module, chapter, and step, associate with module
- - mark course/module/chapter as complete - started, have mechanism for keeping track of progress
+ - `.SCRIPT.md` - started, prompt when creating module, chapter, and step, associate with module (not called script, uses branch name)
  - `learnit save` - completed.
  - `learnit upload` - completed.
  - `learnit rebase` - not started, rebase all branches intelligently (for changes to `main` that need to be everywhere)
@@ -270,6 +269,7 @@ For consumers:
  - `learnit bookmark` - not started, allows user to set up a quick return point
  - `learnit annotate` - not started, allows user to save changes they made
  - `learnit settings` - not started, allows user to configure setup, such as soft stepping so that deltas are visible to outside programs.
+ - mark course/module/chapter as complete - started, have mechanism for keeping track of progress
 
 For both:
 
