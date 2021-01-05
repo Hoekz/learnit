@@ -3,7 +3,7 @@ const { mapCourse } = require('../common/course');
 
 const git = simpleGit();
 
-const equals = (str) => (entry) => entry.value === str || entry.name === str;
+const equals = (str) => (entry) => entry.value === str || entry.name.toLowerCase() === str.toLowerCase();
 
 const isExistingModule = async (module) => {
     const course = await mapCourse();

@@ -2,6 +2,11 @@ const inquirer = require('inquirer');
 const course = require('../common/course');
 const navigate = require('./navigate');
 
+const quit = {
+    name: 'Quit',
+    value: 'quit',
+};
+
 const prompt = (description, options) => {
     if (!options.choices.length) {
         console.log(description, 'has no choices');
@@ -20,6 +25,12 @@ const prompt = (description, options) => {
         type: 'list',
         name: 'value',
         ...options,
+    }).then((answer) => {
+        if (answer.value === 'quit') {
+            process.exit();
+        }
+
+        return answer;
     });
 };
 
@@ -33,7 +44,7 @@ const chooseModule = async () => {
 
     return (await prompt('Welcome to the course!', {
         message: 'Choose a Module',
-        choices: modules,
+        choices: [...modules, new inquirer.Separator(), quit],
     })).value;
 };
 
@@ -42,16 +53,15 @@ const chooseChapter = async (module) => {
 
     return (await prompt(module, {
         message: chapters.length ? 'Choose a Chapter' : 'There are no chapters in this module.',
-        choices: [...chapters, { key: 'b', name: 'Back to Modules', value: 'back' }],
+        choices: [...chapters, new inquirer.Separator(), { name: 'Back to Modules', value: 'back' }, quit],
     })).value;
 };
 
 const navigateChapter = async () => {
-    const choices = [{
-        key: 'b',
+    const choices = [new inquirer.Separator(), {
         name: 'Back to Chapters',
         value: 'back',
-    }];
+    }, quit];
 
     if (!(await navigate.isFirstStep())) {
         choices.unshift({

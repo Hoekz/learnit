@@ -7,9 +7,15 @@ const { unrecognized } = require('../common/errors');
 const { moduleToBranch, branchToModule, chapterToBranch } = require('../common/utils');
 const {
     isExistingModule, isExistingChapter,
-    chapterFrom,
-    setBranchValue, setBranchDescription, getModule
+    chapterFrom, getModule,
+    setBranchValue, setBranchDescription, getBranchConfig,
 } = require('./git-helpers');
+const { scriptFor } = require('../common/script');
+
+async function save(message, cwd) {
+    await git.add(cwd || process.cwd());
+    await git.commit(`save: ${message || (new Date()).toLocaleString()}`, []);
+}
 
 const git = simpleGit();
 
@@ -62,9 +68,10 @@ module.exports = {
             }
 
             const script = cwd ? path.join(cwd, branch + '.md') : branch + '.md';
-            await fs.writeFile(script, `# ${name}\n`, 'utf-8');
-            console.log(`Script started at ${script}`);
-            console.log('Edit the script file to provide a descriptive prompt of the content in the module.');
+            const description = await scriptFor(name);
+            await fs.writeFile(script, `# ${name}\n\n${description}`, 'utf-8');
+            console.log(`Script created for ${name} at ${script}`);
+            await save(`initial commit for ${name}.`, cwd);
         },
     },
     delete: {
@@ -129,7 +136,10 @@ module.exports = {
 
             await git.deleteLocalBranches(branches, true);
 
-            if (!noRemote) {
+            const remotes = await git.getRemotes();
+            const hasOrigin = remotes.some(r => r.name === 'origin');
+
+            if (!noRemote && hasOrigin) {
                 await git.push('origin', ['--delete', ...branches]);
             }
         },
