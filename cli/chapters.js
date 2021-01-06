@@ -1,13 +1,20 @@
+const inquirer = require('inquirer');
 const simpleGit = require('simple-git');
 const { getState, mapCourse } = require('../common/course');
 const { unrecognized } = require('../common/errors');
-const { chapterToBranch, moduleToBranch } = require('../common/utils');
+const { scriptFor, setChapter } = require('../common/script');
+const { chapterToBranch } = require('../common/utils');
 const {
-    nextChapterIndex,
+    nextChapterIndex, isExistingChapter,
     getBranchConfig, setBranchValue, setBranchDescription, chapterFrom, getModule,
 } = require('./git-helpers');
 
 const git = simpleGit();
+
+async function save(message, cwd) {
+    await git.add(cwd || process.cwd());
+    await git.commit(`save: ${message || (new Date()).toLocaleString()}`, []);
+}
 
 module.exports = {
     create: {
@@ -33,15 +40,15 @@ module.exports = {
                 hint: '[true]',
                 optional: true,
             },
-            base: {
-                description: 'What point to build the chapter off of. Defaults to the top of the module branch.',
-                type: 'STR',
-                named: true,
-                hint: '<module>',
-                optional: true,
-            },
+            // base: {
+            //     description: 'What point to build the chapter off of. Defaults to the top of the module branch.',
+            //     type: 'STR',
+            //     named: true,
+            //     hint: '<module>',
+            //     optional: true,
+            // },
         },
-        async command({ chapterTitle, module, merge, base }) {
+        async command({ chapterTitle, module, merge }) {
             const state = await getState();
 
             if (module && !await isExistingModule(module)) {
@@ -56,17 +63,25 @@ module.exports = {
                 process.exit(1);
             }
 
+            const actualModule = await getModule(module);
+
             const chapter = chapterTitle || await nextChapterIndex(module);
 
-            if (await isExistingChapter(chapter)) {
+            if (await isExistingChapter(module, chapter)) {
                 console.log(`Chapter '${chapter}' already exists.`);
                 process.exit(1);
             }
 
-            const newBranch = chapterToBranch(module || state.module, chapter);
-            base = moduleToBranch(module); // TODO: allow different base
+            await git.checkout(actualModule.value);
 
-            await git.checkoutBranch(newBranch, base);
+            const { cwd } = await getBranchConfig.module(module);
+            await setChapter(actualModule, chapter, await scriptFor(chapter));
+            console.log(`Script updated.`);
+            await save(`initial commit for ${chapter}.`, cwd);
+
+            const newBranch = chapterToBranch(module || state.module, chapter);
+            
+            await git.checkoutBranch(newBranch, actualModule.value);
             await setBranchDescription(newBranch, chapter);
 
             if (merge !== undefined) {
@@ -104,7 +119,6 @@ module.exports = {
             },
         },
         async command({ chapter, module, force, noRemote }) {
-            // TODO: implement deletion of chapter
             const state = await getState();
 
             if (!module) {
@@ -125,6 +139,7 @@ module.exports = {
                 process.exit(1);
             }
 
+            const moduleDetails = await getModule(module);
             const chapterDetails = await chapterFrom(module)(chapter);
 
             if (!chapterDetails) {
@@ -145,9 +160,13 @@ module.exports = {
             }
 
             const branch = chapterDetails.value;
-            await git.deleteLocalBranch(branch, true);
+            await git.checkout(moduleDetails.value);
+            await git.deleteLocalBranches([branch], true);
 
-            if (!noRemote) {
+            const remotes = await git.getRemotes();
+            const hasOrigin = remotes.some(r => r.name === 'origin');
+
+            if (!noRemote && hasOrigin) {
                 await git.push('origin', ['--delete', branch]);
             }
         },

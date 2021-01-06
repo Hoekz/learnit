@@ -10,7 +10,7 @@ const {
     chapterFrom, getModule,
     setBranchValue, setBranchDescription, getBranchConfig,
 } = require('./git-helpers');
-const { scriptFor } = require('../common/script');
+const { scriptFor, write } = require('../common/script');
 
 async function save(message, cwd) {
     await git.add(cwd || process.cwd());
@@ -67,10 +67,8 @@ module.exports = {
                 await setBranchValue(branch, 'cwd', cwd);
             }
 
-            const script = cwd ? path.join(cwd, branch + '.md') : branch + '.md';
-            const description = await scriptFor(name);
-            await fs.writeFile(script, `# ${name}\n\n${description}`, 'utf-8');
-            console.log(`Script created for ${name} at ${script}`);
+            await write({ branch }, { description: await scriptFor(name) });
+            console.log(`Script created.`);
             await save(`initial commit for ${name}.`, cwd);
         },
     },

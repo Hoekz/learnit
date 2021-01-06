@@ -60,15 +60,17 @@ const mapCourse = async () => {
 };
 
 const getState = async () => {
+    const course = process.cwd().split('/').pop();
     const { current } = await git.status();
     const config = await git.listConfig();
     
     if (current === 'main') {
-        return { module: null, chapter: null, commit: null };
+        return { course, module: null, chapter: null, commit: null };
     }
     
     if (current.startsWith('module-')) {
         return {
+            course,
             module: config.values['.git/config'][`branch.${current}.description`] || readable('module-')(current),
             chapter: null,
             commit: null,
@@ -81,6 +83,7 @@ const getState = async () => {
         const [module, chapter] = branchToChapter(current);
         
         return {
+            course,
             module: config.values['.git/config'][`branch.${module}.description`] || readable('module-')(module),
             chapter: config.values['.git/config'][`branch.${current}.description`] || readable('module-')(chapter),
             commit: commit,
@@ -94,6 +97,7 @@ const getState = async () => {
             for (const step of chapter.steps) {
                 if (step.hash === commit) {
                     return {
+                        course,
                         module: module.value,
                         chapter: chapter.value,
                         step: step.message,
@@ -104,7 +108,7 @@ const getState = async () => {
         }
     }
 
-    return { module: null, chapter: null, commit: null };
+    return { course, module: null, chapter: null, commit: null };
 };
 
 const isGitRepo = async () => {

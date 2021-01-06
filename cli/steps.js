@@ -5,6 +5,11 @@ const { chapterFrom, isExistingModule, isExistingChapter, getBranchConfig } = re
 
 const git = simpleGit();
 
+async function save(message, cwd) {
+    await git.add(cwd || process.cwd());
+    await git.commit(`save: ${message || (new Date()).toLocaleString()}`, []);
+}
+
 module.exports = {
     create: {
         description: 'Create a new step in a chapter.',
@@ -47,7 +52,7 @@ module.exports = {
 
             const { cwd } = await getBranchConfig.module(module);
 
-            await git.commit(`step: ${label}`, [cwd || '.']);
+            await save(label, cwd);
         },
     },
     update: {
