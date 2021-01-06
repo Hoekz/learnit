@@ -124,6 +124,7 @@ module.exports = {
     getModules,
     getChapters,
     getSteps,
+    getCommits,
     getState,
     mapCourse,
     isGitRepo,

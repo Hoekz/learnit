@@ -28,13 +28,13 @@ async function next() {
         await progress.completed(state.module, state.chapter);
     }
 
-    const choice = await prompter.navigateChapter();
+    const choice = await prompter.navigateChapter(state);
 
     if (choice === 'back') {
         return await navigate.setModule(state.module);
     }
 
-    if (choice === 'next') {
+    if (choice === 'next' || choice === 'start') {
         return await navigate.nextStep();
     }
 

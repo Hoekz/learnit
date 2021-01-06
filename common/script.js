@@ -25,7 +25,7 @@ async function read({ value }) {
     const titleIndex = lines.findIndex(line => line.startsWith('# '));
     const descIndex = lines.slice(titleIndex + 1).findIndex(line => line);
     const firstChapterIndex = lines.findIndex(line => line.startsWith('## '));
-    let description = lines.slice(descIndex, firstChapterIndex).join('\n');
+    let description = lines.slice(descIndex, firstChapterIndex).join('\n').trim();
 
     if (!description || description.startsWith('#')) {
         description = '';
@@ -47,7 +47,7 @@ async function read({ value }) {
         }
 
         if (line.startsWith('## ')) {
-            chapters.push(chapter);
+            chapters.push({ ...chapter, description: chapter.description.trim() });
             return { name: line.replace(/^## /, ''), description: '' };
         }
 
@@ -55,7 +55,7 @@ async function read({ value }) {
     }, {});
 
     if (lastChapter.name) {
-        chapters.push(lastChapter);
+        chapters.push({ ...lastChapter, description: lastChapter.description.trim() });
     }
 
     return { description, chapters };

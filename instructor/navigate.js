@@ -14,19 +14,23 @@ const setChapter = async (module, chapter) => {
         return goTo(commit);
     }
 
-    const steps = await course.getSteps(module, chapter);
+    const chapterBranch = chapterToBranch(module, chapter);
+    const commits = await course.getCommits(moduleToBranch(module), chapterBranch);
 
-    return steps.length ? goTo(steps[0].hash) : goTo(chapterToBranch(module, chapter));
+    return goTo(commits.length ? commits[commits.length - 1] : chapterBranch);
 };
 
 const nextStep = async () => {
     const state = await course.getState();
+    const steps = await course.getSteps(state.module, state.chapter);
 
-    if (!state.commit) {
+    if (!steps.length) {
         return false;
     }
 
-    const steps = await course.getSteps(state.module, state.chapter);
+    if (!state.commit) {
+        return goTo(steps[0].hash);
+    }
 
     const current = steps.findIndex(step => step.hash === state.commit);
 

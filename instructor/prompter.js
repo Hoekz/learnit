@@ -3,8 +3,23 @@ const inquirer = require('inquirer');
 const course = require('../common/course');
 const navigate = require('./navigate');
 
+const { read } = require('../common/script');
+const { getModule, chapterFrom } = require('../cli/git-helpers');
+
 function locationString({ course, module, chapter, step }) {
-    return ` ${[course, module, chapter, step].filter(e => e).join(' >  ')} `;
+    return ` ${[course, module, chapter, step].filter(e => e).join(' > ')} `;
+}
+
+function format(desc) {
+    const rules = [
+        [/[^_]_[^_]+_/g, str => str.italic],
+        [/[^*]\*[^*]+\*/g, str => str.italic],
+        [/__[^_]+__/g, str => str.bold],
+        [/\*\*[^*]+\*\*/g, str => str.bold],
+        [/`[^`]+`/g, str => str.green],
+    ];
+
+    return rules.reduce((str, [pattern, sub]) => str.replace(pattern, sub), desc);
 }
 
 const quit = {
@@ -23,10 +38,8 @@ const prompt = async (description, options) => {
     console.clear();
     console.log(locationString(state).bgWhite.black);
 
-    if (description instanceof Array) {
-        description.forEach(line => console.log(line));
-    } else {
-        console.log(description);
+    if (description) {
+        console.log(format(description));
     }
 
     const { value } = await inquirer.prompt({
@@ -57,19 +70,40 @@ const chooseModule = async () => {
 };
 
 const chooseChapter = async (module) => {
+    const detailedModule = await getModule(module);
+    const script = await read(detailedModule);
     const chapters = await course.getChapters(module);
 
-    return await prompt(module, {
+    return await prompt(script.description, {
         message: chapters.length ? 'Choose a Chapter' : 'There are no chapters in this module.',
-        choices: [...chapters, new inquirer.Separator(), { name: 'Back to Modules', value: 'back' }, quit],
+        choices: [...chapters, new inquirer.Separator(), { name: 'Back to Module List', value: 'back' }, quit],
     });
-};
+};                    
 
-const navigateChapter = async () => {
+const navigateChapter = async ({ module, chapter, step }) => {
+    const detailedModule = await getModule(module);
+    const detailedChapter = await chapterFrom(module)(chapter);
+    const script = await read(detailedModule);
+    const scriptChapter = script.chapters.find(c => c.name.trim().toLowerCase() === chapter.trim().toLowerCase());
+
     const choices = [new inquirer.Separator(), {
-        name: 'Back to Chapters',
+        name: 'Back to Chapter List',
         value: 'back',
     }, quit];
+
+    if (!step) {
+        if (!detailedChapter.steps.length) {
+            return await prompt(scriptChapter.description, {
+                message: 'There is no content in this chapter.',
+                choices,
+            });
+        }
+
+        return await prompt(scriptChapter.description, {
+            message: 'Would you like to read this chapter?',
+            choices: [{ name: 'Start Chapter', value: 'start' }, ...choices],
+        });
+    }
 
     if (!(await navigate.isFirstStep())) {
         choices.unshift({
@@ -88,9 +122,8 @@ const navigateChapter = async () => {
     }
 
     const message = choices.length === 3 ? 'There is no content in this chapter.' : '';
-    const scriptLines = [];
 
-    return await prompt(scriptLines, { message, choices });
+    return await prompt('', { message, choices });
 };
 
 module.exports = { chooseModule, chooseChapter, navigateChapter };
