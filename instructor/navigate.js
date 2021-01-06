@@ -24,8 +24,6 @@ const nextStep = async () => {
     const state = await course.getState();
     const steps = await course.getSteps(state.module, state.chapter);
 
-    await new Promise(res => setTimeout(res, 10000));
-
     if (!steps.length) {
         return false;
     }

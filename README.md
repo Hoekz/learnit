@@ -255,7 +255,7 @@ For creators:
  - `learnit list chapters` - completed.
  - `learnit config` - completed.
  - `.learnitignore` - not started, eventually want multiple directory support, support module or chapter annotations
- - `.SCRIPT.md` - started, prompt when creating module, chapter, and step, associate with module (not called script, uses branch name)
+ - `.SCRIPT.md` - started, prompt when creating module, chapter, and step, associate with module (not called script, uses branch name), close to completed.
  - `learnit save` - completed.
  - `learnit upload` - completed.
  - `learnit rebase` - not started, rebase all branches intelligently (for changes to `main` that need to be everywhere)

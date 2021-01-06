@@ -112,19 +112,11 @@ const navigateChapter = async ({ module, chapter, step }) => {
     }
 
     if (!(await navigate.isFirstStep())) {
-        choices.unshift({
-            key: '2',
-            name: 'Previous Step',
-            value: 'prev',
-        });
+        choices.unshift({ name: 'Previous Step', value: 'prev' });
     }
 
     if (!(await navigate.isLastStep())) {
-        choices.unshift({
-            key: '1',
-            name: 'Next Step',
-            value: 'next',
-        });
+        choices.unshift({ name: 'Next Step', value: 'next' });
     }
 
     const scriptStep = scriptChapter.steps.find(s => s.name === step);

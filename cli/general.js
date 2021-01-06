@@ -1,10 +1,11 @@
 const simpleGit = require('simple-git');
 const { getState } = require('../common/course');
-const { getBranchConfig, chapterFrom, getModule } = require('./git-helpers');
+const { getBranchConfig, chapterFrom, getModule, setBranchValue } = require('./git-helpers');
 
 const courses = require('./courses');
 const modules = require('./modules');
 const chapters = require('./chapters');
+const { command } = require('../instructor');
 
 const git = simpleGit();
 
@@ -93,6 +94,66 @@ module.exports = {
             const branch = (await (chapter ? chapterFrom(module)(chapter) : getModule(module))).value;
             printConfig(chapter || module, await getBranchConfig(branch));
         },
+    },
+    settings: {
+        description: 'Edit the settings of the course such as styling and stepping.',
+        args: {
+            key: {
+                description: 'Settings key to view or set.',
+                type: 'STR',
+                named: false,
+                optional: true,
+            },
+            value: {
+                description: 'Value to set key to.',
+                type: 'STR',
+                named: false,
+                optional: true,
+            },
+        },
+        async command({ key, value }) {
+            if (!key) {
+                // TODO: interactive settings
+                process.exit();
+            }
+
+            if (!(key in courseSettings)) {
+                console.log(`Invalid settings key '${key}'.`);
+                process.exit(1);
+            }
+
+            if (!value) {
+                const config = await getBranchConfig('main');
+
+                console.log(config[key] || courseSettings[key].default);
+                process.exit();
+            }
+
+            if (!courseSettings[key].values.includes(value)) {
+                console.log(`Invalid value for key '${key}', must be one of: ${courseSettings[key].values.join(', ')}`);
+                process.exit(1);
+            }
+
+            await setBranchValue('main', key, value);
+        },
+    },
+};
+
+const courseSettings = {
+    'diff.commits': {
+        description: 'When navigating between steps, controls whether a commit is fully checked out, or if it is softly checked out to allow external programs to visualize the current changes.',
+        values: ['true', 'false'],
+        default: 'false',
+    },
+    'markdown.active': {
+        description: 'Whether or not to format script as markdown.',
+        values: ['true', 'false'],
+        default: 'true',
+    },
+    'markdown.symbols': {
+        description: 'When rendering markdown, leave symbols such as _, *, or ~ present.',
+        values: ['true', 'false'],
+        default: 'false',
     },
 };
 
