@@ -17,18 +17,20 @@ const setChapter = async (module, chapter) => {
     const chapterBranch = chapterToBranch(module, chapter);
     const commits = await course.getCommits(moduleToBranch(module), chapterBranch);
 
-    return goTo(commits.length ? commits[commits.length - 1] : chapterBranch);
+    return goTo(commits.length ? commits[commits.length - 1].hash : chapterBranch);
 };
 
 const nextStep = async () => {
     const state = await course.getState();
     const steps = await course.getSteps(state.module, state.chapter);
 
+    await new Promise(res => setTimeout(res, 10000));
+
     if (!steps.length) {
         return false;
     }
 
-    if (!state.commit) {
+    if (!state.step) {
         return goTo(steps[0].hash);
     }
 

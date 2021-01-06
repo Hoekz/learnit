@@ -1,13 +1,14 @@
 const simpleGit = require('simple-git');
 const { getState } = require('../common/course');
 const { unrecognized } = require('../common/errors');
-const { chapterFrom, isExistingModule, isExistingChapter, getBranchConfig } = require('./git-helpers');
+const { scriptFor, addStep } = require('../common/script');
+const { chapterFrom, isExistingModule, isExistingChapter, getBranchConfig, getModule } = require('./git-helpers');
 
 const git = simpleGit();
 
-async function save(message, cwd) {
+async function step(message, cwd) {
     await git.add(cwd || process.cwd());
-    await git.commit(`save: ${message || (new Date()).toLocaleString()}`, []);
+    await git.commit(`step: ${message || (new Date()).toLocaleString()}`, []);
 }
 
 module.exports = {
@@ -49,10 +50,15 @@ module.exports = {
             }
 
             label = label || (await chapterFrom(module)(chapter).steps.length);
+            const moduleDetails = await getModule(module);
+            const chapterDetails = await chapterFrom(module)(chapter);
 
             const { cwd } = await getBranchConfig.module(module);
 
-            await save(label, cwd);
+            await addStep(moduleDetails, chapterDetails, label, await scriptFor(label));
+            console.log('Script updated.');
+
+            await step(label, cwd);
         },
     },
     update: {

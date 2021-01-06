@@ -35,8 +35,9 @@ const getModules = () => getBranches('module', branchToModule);
 const getChapters = (module) => getBranches(chapterToBranch(module, ''), (b) => branchToChapter(b)[1]);
 const getSteps = async (module, chapter) => {
     const commits = await getCommits(moduleToBranch(module), chapterToBranch(module, chapter));
-    const start = commits.findIndex(commit => commit.message === 'step: chapter-start');
-    const end = commits.findIndex(commit => commit.message === 'step: chapter-end');
+    const steps = commits.filter(commit => commit.message.startsWith('step:'));
+    const start = commits.indexOf(steps[steps.length - 1]);
+    const end = commits.indexOf(steps[0]);
 
     return commits.slice(end, start + 1).reverse();
 };
@@ -52,6 +53,7 @@ const mapCourse = async () => {
         module.chapters = await getChapters(module.value);
 
         for (const chapter of module.chapters) {
+            chapter.commits = await getCommits(module.value, chapter.value);
             chapter.steps = await getSteps(module.value, chapter.value);
         }
     }
@@ -98,9 +100,21 @@ const getState = async () => {
                 if (step.hash === commit) {
                     return {
                         course,
-                        module: module.value,
-                        chapter: chapter.value,
-                        step: step.message,
+                        module: module.name,
+                        chapter: chapter.name,
+                        step: step.message.replace('step: ', ''),
+                        commit: commit,
+                    };
+                }
+            }
+
+            for (const chapterCommit of chapter.commits) {
+                if (chapterCommit.hash === commit) {
+                    return {
+                        course,
+                        module: module.name,
+                        chapter: chapter.name,
+                        step: null,
                         commit: commit,
                     };
                 }

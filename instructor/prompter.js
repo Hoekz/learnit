@@ -84,7 +84,13 @@ const navigateChapter = async ({ module, chapter, step }) => {
     const detailedModule = await getModule(module);
     const detailedChapter = await chapterFrom(module)(chapter);
     const script = await read(detailedModule);
-    const scriptChapter = script.chapters.find(c => c.name.trim().toLowerCase() === chapter.trim().toLowerCase());
+    const scriptChapter = script.chapters.find(c => {
+        if (/^\d+$/.test(chapter)) {
+            return c.name.endsWith(chapter);
+        }
+
+        return c.name.trim().toLowerCase() === chapter.trim().toLowerCase();
+    });
 
     const choices = [new inquirer.Separator(), {
         name: 'Back to Chapter List',
@@ -121,9 +127,11 @@ const navigateChapter = async ({ module, chapter, step }) => {
         });
     }
 
-    const message = choices.length === 3 ? 'There is no content in this chapter.' : '';
+    const scriptStep = scriptChapter.steps.find(s => s.name === step);
 
-    return await prompt('', { message, choices });
+    const message = choices.length === 3 ? 'There is no content in this chapter.' : 'Go to:';
+
+    return await prompt(scriptStep.description, { message, choices });
 };
 
 module.exports = { chooseModule, chooseChapter, navigateChapter };
