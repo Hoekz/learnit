@@ -4,7 +4,9 @@ const path = require('path');
 const directory = process.cwd();
 
 async function ensureLearnitDirectory() {
-    await fs.mkdir(path.join(directory, '.learnit'));
+    try {
+        await fs.mkdir(path.join(directory, '.learnit'));
+    } catch(e) {}
 }
 
 module.exports = class Saveable {
@@ -31,12 +33,18 @@ module.exports = class Saveable {
         this.locked = false;
     }
 
-    onSave(fn) {
+    async onSave(fn) {
+        if (!this.hasFile) {
+            await ensureLearnitDirectory();
+            await fs.writeFile(this.file, JSON.stringify(this.value), 'utf-8');
+        }
+
         if (!this.watching) {
             this.watching = true;
             watch(this.file, {}, async (event) => {
                 if (event === 'change' && !this.locked) {
-                    this.value = JSON.parse((await fs.readFile(this.file)).toString());
+                    const content = (await fs.readFile(this.file)).toString();
+                    this.value = JSON.parse(content);
                     this.listeners.forEach(fn => fn(this.value));
                 }
             });

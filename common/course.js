@@ -6,7 +6,7 @@ const { branchToModule, branchToChapter, moduleToBranch, chapterToBranch } = req
 const git = simpleGit();
 
 const courseMap = { value: null };
-const state = new Saveable('state', )
+const state = new Saveable('state', null);
 
 const getBranches = async (prefix, describe = identity) => {
     const branches = await git.branch(['--list', `${prefix}*`]);
@@ -60,6 +60,12 @@ const mapCourse = async () => {
 
     return courseMap.value;
 };
+
+const saveState = async () => {
+    state.value = await getState();
+    await state.save();
+    return state.value;
+}
 
 const getState = async () => {
     const course = process.cwd().split('/').pop();
@@ -135,11 +141,12 @@ const isGitRepo = async () => {
 };
 
 module.exports = {
+    state,
     getModules,
     getChapters,
     getSteps,
     getCommits,
-    getState,
+    getState: saveState,
     mapCourse,
     isGitRepo,
 };

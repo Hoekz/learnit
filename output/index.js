@@ -99,5 +99,7 @@ module.exports = {
             state.onSave(onChange(state.value, logDelta));
             logDelta(state.value);
         }
+
+        while (true) await new Promise(res => setTimeout(res, 5000));
     },
 };

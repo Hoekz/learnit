@@ -1,5 +1,6 @@
 const simpleGit = require('simple-git');
 const colors = require('colors');
+const { moduleToBranch } = require('../common/utils');
 const git = simpleGit();
 
 const DIFF_BETWEEN = Symbol.for('DIFF_BETWEEN');
@@ -91,12 +92,22 @@ const parseDiff = (str) => {
     return files;
 };
 
-module.exports = async (state) => {
-    // TODO: determine if diff should be calculated.
-    const diff = await git.diff();
-
+module.exports = async (state) => {    
     console.clear();
-    return parseDiff(diff).forEach(file => {
+    
+    if (!state.step) {
+        console.log('No information to show.');
+        return;
+    }
+    
+    // TODO: determine if diff should be calculated.
+    const diff = await git.diff([`${state.commit}^!`]);
+
+    console.log(`Updated at ${(new Date()).toLocaleTimeString()}`);
+
+    return parseDiff(diff).filter(file => {
+        return !file.name.endsWith(`${moduleToBranch(state.module)}.md`);
+    }).forEach(file => {
         console.log('='.repeat(80));
         console.log(file.rename
             ? `${colors.red(file.oldName)} -> ${colors.green(file.name)}`
