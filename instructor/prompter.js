@@ -1,22 +1,25 @@
 require('colors');
 const inquirer = require('inquirer');
+
 const course = require('../common/course');
+const { read } = require('../common/script');
+const settings = require('../common/settings');
+
 const navigate = require('./navigate');
 
-const { read } = require('../common/script');
 const { getModule, chapterFrom } = require('../cli/git-helpers');
 
 function locationString({ course, module, chapter, step }) {
     return ` ${[course, module, chapter, step].filter(e => e).join(' > ')} `;
 }
 
-function format(desc) {
+function format(desc, showSymbols) {
     const rules = [
-        [/[^_]_[^_]+_/g, str => str.italic],
-        [/[^*]\*[^*]+\*/g, str => str.italic],
-        [/__[^_]+__/g, str => str.bold],
-        [/\*\*[^*]+\*\*/g, str => str.bold],
-        [/`[^`]+`/g, str => str.green],
+        [/([^_])_([^_]+)_/g, (full, lead, target) => showSymbols ? full.italic : lead + target.italic],
+        [/([^*])\*([^*]+)\*/g, (full, lead, target) => showSymbols ? full.italic : lead + target.italic],
+        [/__([^_]+)__/g, (full, target) => showSymbols ? full.bold : target.bold],
+        [/\*\*([^*]+)\*\*/g, (full, target) => showSymbols ? full.bold : target.bold],
+        [/`([^`]+)`/g, (full, target) => showSymbols ? full.green : target.green],
     ];
 
     return rules.reduce((str, [pattern, sub]) => str.replace(pattern, sub), desc);
@@ -39,7 +42,10 @@ const prompt = async (description, options) => {
     console.log(locationString(state).bgWhite.black);
 
     if (description) {
-        console.log(format(description));
+        const markdownActive = (await settings.get('markdown.active')) === 'true';
+        const markdownSymbols = (await settings.get('markdown.symbols')) === 'true';
+
+        console.log(markdownActive ? format(description, markdownSymbols) : description);
     }
 
     const { value } = await inquirer.prompt({
@@ -121,7 +127,7 @@ const navigateChapter = async ({ module, chapter, step }) => {
 
     const scriptStep = scriptChapter.steps.find(s => s.name === step);
 
-    const message = choices.length === 3 ? 'There is no content in this chapter.' : 'Go to:';
+    const message = choices.length === 3 ? 'There is no other content in this chapter.' : 'Go to:';
 
     return await prompt(scriptStep.description, { message, choices });
 };
