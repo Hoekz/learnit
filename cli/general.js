@@ -1,11 +1,11 @@
 const simpleGit = require('simple-git');
 const { getState } = require('../common/course');
+const settings = require('../common/settings');
 const { getBranchConfig, chapterFrom, getModule, setBranchValue } = require('./git-helpers');
 
 const courses = require('./courses');
 const modules = require('./modules');
 const chapters = require('./chapters');
-const { command } = require('../instructor');
 
 const git = simpleGit();
 
@@ -113,47 +113,18 @@ module.exports = {
         },
         async command({ key, value }) {
             if (!key) {
-                // TODO: interactive settings
-                process.exit();
-            }
+                await settings.interactive();
 
-            if (!(key in courseSettings)) {
-                console.log(`Invalid settings key '${key}'.`);
-                process.exit(1);
+                process.exit();
             }
 
             if (!value) {
-                const config = await getBranchConfig('main');
-
-                console.log(config[key] || courseSettings[key].default);
+                console.log(await settings.get(key));
                 process.exit();
             }
 
-            if (!courseSettings[key].values.includes(value)) {
-                console.log(`Invalid value for key '${key}', must be one of: ${courseSettings[key].values.join(', ')}`);
-                process.exit(1);
-            }
-
-            await setBranchValue('main', key, value);
+            await settings.set(key, value);
         },
-    },
-};
-
-const courseSettings = {
-    'diff.commits': {
-        description: 'When navigating between steps, controls whether a commit is fully checked out, or if it is softly checked out to allow external programs to visualize the current changes.',
-        values: ['true', 'false'],
-        default: 'false',
-    },
-    'markdown.active': {
-        description: 'Whether or not to format script as markdown.',
-        values: ['true', 'false'],
-        default: 'true',
-    },
-    'markdown.symbols': {
-        description: 'When rendering markdown, leave symbols such as _, *, or ~ present.',
-        values: ['true', 'false'],
-        default: 'false',
     },
 };
 

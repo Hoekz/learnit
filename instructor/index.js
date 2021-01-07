@@ -1,5 +1,4 @@
 const progress = require('./progress');
-const settings = require('./settings');
 const navigate = require('./navigate');
 const prompter = require('./prompter');
 const course = require('../common/course');
