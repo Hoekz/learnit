@@ -67,7 +67,7 @@ module.exports = {
                 await setBranchValue(branch, 'cwd', cwd);
             }
 
-            await write({ branch }, { description: await scriptFor(name) });
+            await write({ value: branch, name }, { description: await scriptFor(name) });
             console.log(`Script created.`);
             await save(`initial commit for ${name}.`, cwd);
         },

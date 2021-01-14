@@ -5,6 +5,7 @@ const modules = require('./modules');
 const chapters = require('./chapters');
 const steps = require('./steps');
 const createCommand = require('./create-command');
+const deleteCommand = require('./delete-command');
 const instructor = require('../instructor');
 const output = require('../output');
 const { snake, underscore } = require('./utils');
@@ -144,6 +145,7 @@ const writerCommands = {
     'delete': {
         'module': modules.delete,
         'chapter': chapters.delete,
+        'command': deleteCommand,
     },
     'finish': {
         'chapter': chapters.finish,

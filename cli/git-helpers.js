@@ -33,7 +33,7 @@ const chapterFrom = (module) => async (chapter) => {
 const isExistingStep = async (module, chapter, stepLabel) => {
     const { steps } = await chapterFrom(module)(chapter);
 
-    return steps.find(step => step.message.contains(stepLabel));
+    return steps.find(step => step.message.includes(stepLabel));
 };
 
 const nextChapterIndex = async (module) => {

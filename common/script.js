@@ -80,6 +80,11 @@ function parseMarkdown(lines) {
                 if (line.startsWith('### ')) {
                     if (!step.name) {
                         step.name = line.replace('### ', '');
+
+                        if (/^Step \d+$/.test(step.name)) {
+                            step.name = step.name.replace('Step ', '');
+                        }
+
                         break;
                     } else {
                         step.description = description.join('\n').trim();
@@ -106,7 +111,12 @@ function parseMarkdown(lines) {
 
     if (chapter.name) {
         chapter.description = chapter.description || description.join('\n').trim();
+        description = [];
         script.chapters.push(chapter);
+    }
+
+    if (description.length) {
+        script.description = description.join('\n').trim();
     }
 
     return script;

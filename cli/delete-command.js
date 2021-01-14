@@ -7,24 +7,22 @@ const {
     getModule, chapterFrom
 } = require('./git-helpers');
 
-const addCommandToBranch = async (branch, command, reloadOnStep, cwd, label) => {
+const removeCommandFromBranch = async (branch, labelOrCommand) => {
     const config = await getBranchConfig(branch);
-    await setBranchValue(branch, 'commands', [...(config.commands || []), {
-        run: command,
-        refresh: !!reloadOnStep,
-        cwd: cwd || config.cwd || process.cwd(),
-        prefix: label,
-    }]);
+    await setBranchValue(branch, 'commands', (config.commands || []).filter((cmd) => {
+        return cmd.run !== labelOrCommand && cmd.prefix !== labelOrCommand;
+    }));
 };
 
 module.exports = {
-    description: 'Associate a script or command with a point in the course.',
+    description: 'Remove an associated script or command with a point in the course.',
     args: {
         command: {
-            description: 'The command to be run.',
+            description: 'The existing command. Either label or command must be provided.',
             type: 'STR',
-            named: false,
-            optional: false,
+            named: true,
+            hint: '<command>',
+            optional: true,
         },
         module: {
             description: 'The module for which to run the command.',
@@ -54,28 +52,15 @@ module.exports = {
             hint: `<'module'|'chapter'|'step'>`,
             optional: true,
         },
-        reloadOnStep: {
-            description: 'Indicate that the command should be restarted when the user navigates to a new step.',
-            type: 'BOOL',
-            named: true,
-            optional: true,
-        },
-        cwd: {
-            description: 'Directory in which to run the command. Defaults to project directory.',
-            type: 'STR',
-            named: true,
-            hint: '<directory>',
-            optional: true,
-        },
         label: {
-            description: 'Label to prepend to command output.',
+            description: 'Label to prepend to command output. Either label or command must be provided.',
             type: 'STR',
             named: true,
             hint: '<label>',
             optional: true,
         }
     },
-    async command({ command, module, chapter, step, atCurrent, reloadOnStep, cwd, label }) {
+    async command({ command, module, chapter, step, atCurrent, label }) {
         if (atCurrent) {
             state = await getState();
             module = state.module;
@@ -88,11 +73,11 @@ module.exports = {
                 type: 'confirm',
                 name: 'value',
                 default: false,
-                message: 'Are you sure you want to create a command at the top level of the course?'
+                message: 'Are you sure you want to remove a command at the top level of the course?'
             })).value;
             
             if (confirm) {
-                await addCommandToBranch('main', command, reloadOnStep, cwd, label);
+                await removeCommandFromBranch('main', label || command);
             }
 
             process.exit();
@@ -104,7 +89,7 @@ module.exports = {
 
         if (!chapter || atCurrent === 'module') {
             const { value } = await getModule(module);
-            await addCommandToBranch(value, command, reloadOnStep, cwd, label);
+            await removeCommandFromBranch(value, label || command);
             process.exit();
         }
 
@@ -115,7 +100,7 @@ module.exports = {
         const { value } = await chapterFrom(module)(chapter);
 
         if (!step || atCurrent === 'chapter') {
-            await addCommandToBranch(value, command, reloadOnStep, cwd, label);
+            await removeCommandFromBranch(value, label || command);
             process.exit();
         }
 
@@ -123,6 +108,6 @@ module.exports = {
             unrecognized.step(step);
         }
 
-        await addCommandToBranch(`${value}.${step}`, command, false, cwd, label);
+        await removeCommandFromBranch(`${value}.${step.replace(/^step: /, '')}`, label || command);
     },
 };

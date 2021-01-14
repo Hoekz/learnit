@@ -86,18 +86,22 @@ const getState = async () => {
     }
 
     const commit = await git.revparse(['HEAD']);
-    
+
     if (current.includes('-chapter-')) {
+        const { chapterFrom } = require('../cli/git-helpers');
         const [module, chapter] = branchToChapter(current);
-        
+        const detailedChapter = await chapterFrom(module)(chapter);
+        const step = detailedChapter.steps.find(step => step.hash === commit);
+
         return {
             course,
             module: config.values['.git/config'][`branch.${module}.description`] || readable('module-')(module),
             chapter: config.values['.git/config'][`branch.${current}.description`] || readable('module-')(chapter),
+            step: step ? step.message.replace('step: ', '') : null,
             commit: commit,
         };
     }
-    
+
     const map = await mapCourse();
 
     for (const module of map) {

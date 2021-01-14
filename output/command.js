@@ -21,6 +21,8 @@ module.exports = class Command {
         this.running = false;
         this.process = null;
         this.killing = false;
+
+        this.log = this.log.bind(this);
     }
 
     async matches({ module, chapter, step }) {
@@ -44,7 +46,7 @@ module.exports = class Command {
             return matchChapter;
         }
 
-        return step === (await stepFrom(this.module, this.chapter, this.step)).message;
+        return step === (await stepFrom(this.module, this.chapter, this.step)).message.replace(/^step: /, '');
     }
 
     async start() {
@@ -54,6 +56,7 @@ module.exports = class Command {
             maxBuffer: 5 * Math.pow(2, 20),
             windowsHide: true,
         });
+        this.running = true;
 
         this.process.on('error', (err) => {
             this.running = false;
@@ -61,25 +64,25 @@ module.exports = class Command {
             console.log(`${this.prefix} Failed to start: ${err}.`);
         });
 
-        this.process.stdout.on('data', (data) => {
-            data.toString().split('\n').forEach(line => {
-                console.log(`${this.prefix} ${line}`);
-            });
-        });
-
-        this.process.stderr.on('data', (data) => {
-            data.toString().split('\n').forEach(line => {
-                console.error(`${this.prefix} ${line}`);
-            });
-        });
+        this.process.stdout.on('data', this.log);
+        this.process.stderr.on('data', this.log);
 
         this.process.on('close', (code) => {
             this.running = false;
             this.process = null;
-            if (!this.killing && !this.refresh && !code) {
+            if (!this.killing) {
                 console.log(`${this.prefix} Exited with code ${code}.`);
             }
+            this.killing = false;
         });
+    }
+
+    log(data) {
+        const lines = data.toString().split('\n');
+        const last = lines.pop();
+        const withPrefix = lines.map(line => `${this.prefix} ${line}`).join('\n') + (last ? `${this.prefix} ${last}` : '\n');
+
+        process.stdout.write(withPrefix);
     }
 
     async stop() {
@@ -87,8 +90,6 @@ module.exports = class Command {
             this.killing = true;
             this.running = false;
             this.process.kill();
-            this.process = null;
-            this.killing = false;
         }
     }
 }

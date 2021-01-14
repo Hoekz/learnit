@@ -8,7 +8,7 @@ const git = simpleGit();
 
 async function step(message, cwd) {
     await git.add(cwd || process.cwd());
-    await git.commit(`step: ${message || (new Date()).toLocaleString()}`, []);
+    await git.commit(`step: ${message}`, []);
 }
 
 module.exports = {
@@ -49,7 +49,7 @@ module.exports = {
                 unrecognized.chapter(chapter);
             }
 
-            label = label || (await chapterFrom(module)(chapter).steps.length);
+            label = label || ((await chapterFrom(module)(chapter)).steps.length + 1);
             const moduleDetails = await getModule(module);
             const chapterDetails = await chapterFrom(module)(chapter);
 
@@ -89,9 +89,9 @@ module.exports = {
             }
         },
         async command({ soft }) {
-            const { step } = await getState();
+            const state = await getState();
 
-            if (!step) {
+            if (!state.step) {
                 console.error('You must be navigated to a step to revert it.');
                 process.exit(1);
             }

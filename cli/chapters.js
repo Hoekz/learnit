@@ -322,7 +322,7 @@ module.exports = {
 
                 if (chapters.length) {
                     console.log(`Listing all chapters in ${name}...`);
-                    chapters.forEach(log);
+                    chapters.forEach((c) => log(c));
                 } else {
                     console.log(`No chapters in ${name}. Create a new chapter with \`learnit new chapter <chapter>\`.`);
                 }

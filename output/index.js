@@ -31,7 +31,7 @@ const loadAllCommands = async () => {
             }
 
             for (const step of chapter.steps) {
-                const { commands } = await getBranchConfig(`${chapter.value}.${step.message}`);
+                const { commands } = await getBranchConfig(`${chapter.value}.${step.message.replace(/^step: /, '')}`);
 
                 if (commands && commands.length) {
                     commands.forEach((cmd) => {
@@ -47,7 +47,7 @@ const loadAllCommands = async () => {
 
 const updateOutput = async (newState) => {
     for (const command of allCommands) {
-        if (command.running && !await command.matches(newState)) {
+        if (command.running && !(await command.matches(newState))) {
             await command.stop();
         }
 
@@ -90,7 +90,10 @@ module.exports = {
     },
     async command({ delta, noDelta }) {
         if (!delta || noDelta) {
+            console.log('Loading all commands...');
             await loadAllCommands();
+            console.log(`Loaded ${allCommands.length} commands.`);
+            // allCommands.forEach(cmd => console.log(cmd));
             state.onSave(onChange(state.value, updateOutput));
             updateOutput(state.value);
         }
