@@ -2,9 +2,9 @@ const { spawn } = require('child_process');
 const colors = require('colors');
 const { getModule, chapterFrom, stepFrom } = require("../cli/git-helpers");
 
-const colorTable = ['red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white', 'gray'].map(c => colors[c]);
+const colorTable = ['red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'gray'].map(c => colors[c]);
 
-const hash = (str) => colorTable[str.split('').reduce((n, c) => n * 17 + c.charCodeAt(), str.length) % colorTable.length];
+const hash = (str) => colorTable[str.split('').reduce((n, c) => (n * 59 + c.charCodeAt()) % colorTable.length, str.length)];
 
 module.exports = class Command {
     constructor({ run, refresh, cwd, prefix, module, chapter, step }) {
@@ -15,8 +15,8 @@ module.exports = class Command {
         this.module = module;
         this.chapter = chapter;
         this.step = step;
-        this.prefix = prefix || step || chapter || module;
-        this.prefix = hash(this.prefix)(`[${this.prefix}]`);
+        this.rawPrefix = prefix || step || chapter || module;
+        this.prefix = hash(this.run)(`[${this.rawPrefix}]`);
 
         this.running = false;
         this.process = null;
@@ -57,11 +57,13 @@ module.exports = class Command {
             windowsHide: true,
         });
         this.running = true;
+        console.log(`Command Starting: ${hash(this.run)(this.run)}`);
 
         this.process.on('error', (err) => {
             this.running = false;
             this.process = null;
-            console.log(`${this.prefix} Failed to start: ${err}.`);
+            console.log(`Failed to start: ${hash(this.run)(this.run)}`);
+            console.log(`Reason: ${err}`);
         });
 
         this.process.stdout.on('data', this.log);
@@ -71,7 +73,7 @@ module.exports = class Command {
             this.running = false;
             this.process = null;
             if (!this.killing) {
-                console.log(`${this.prefix} Exited with code ${code}.`);
+                console.log(`Exited with code ${code}: ${hash(this.run)(this.run)}`);
             }
             this.killing = false;
         });

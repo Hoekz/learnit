@@ -1,10 +1,10 @@
-const fs = require('fs').promises;
 const path = require('path');
 const simpleGit = require('simple-git');
 const { mapCourse, isGitRepo } = require('../common/course');
 const { unrecognized, missing } = require('../common/errors');
 const { chapterToBranch } = require('../common/utils');
 const { isExistingModule, getModule, setBranchValue } = require('./git-helpers');
+const gitFs = require('../common/git-fs');
 
 const git = simpleGit();
 
@@ -13,12 +13,12 @@ const toIgnore = `
 .learnit/
 `;
 
-const writeGitIgnore = (content) => fs.writeFile('.gitignore', content, 'utf-8');
+const writeGitIgnore = (content) => gitFs.writeFile('.gitignore', content, 'utf-8');
 
 const ensureGitIgnore = async () => {
     try {
-        await fs.access('.gitignore');
-        const ignore = (await fs.readFile('.gitignore', 'utf-8')).toString().split('\n');
+        await gitFs.access('.gitignore');
+        const ignore = (await gitFs.readFile('.gitignore', 'utf-8')).toString().split('\n');
 
         if (!ignore.includes('.learnit')) {
             await writeGitIgnore(ignore.join('\n') + toIgnore);

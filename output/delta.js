@@ -95,7 +95,7 @@ const parseDiff = (str) => {
 module.exports = async (state) => {    
     console.clear();
     
-    if (!state.step) {
+    if (!state || !state.step) {
         console.log('No information to show.');
         return;
     }

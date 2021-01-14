@@ -1,5 +1,4 @@
 const { promises: fs } = require('fs');
-const path = require('path');
 const simpleGit = require('simple-git');
 const inquirer = require('inquirer');
 const { getState, mapCourse } = require('../common/course');

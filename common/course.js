@@ -1,4 +1,3 @@
-const fs = require('fs').promises;
 const Saveable = require('./saveable');
 const simpleGit = require('simple-git');
 const { branchToModule, branchToChapter, moduleToBranch, chapterToBranch } = require('../common/utils');
@@ -137,7 +136,7 @@ const getState = async () => {
 
 const isGitRepo = async () => {
     try {
-        await fs.access('.git');
+        await gitFs.rootDirecotry();
         return true;
     } catch(e) {
         return false;
