@@ -10,7 +10,13 @@ module.exports = {
 
         fs.writeFileSync(file, 'on', 'utf8');
 
-        process.on('exit', () => fs.writeFileSync(file, 'off'));
+        const turnOff = () => {
+            fs.writeFileSync(file, 'off');
+            process.exit();
+        };
+
+        process.on('SIGTERM', turnOff);
+        process.on('SIGINT', turnOff);
     },
     async check(name) {
         try {

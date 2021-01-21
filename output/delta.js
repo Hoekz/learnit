@@ -1,6 +1,7 @@
 const simpleGit = require('simple-git');
 const colors = require('colors');
 const { moduleToBranch } = require('../common/utils');
+const gitFs = require('../common/git-fs');
 const git = simpleGit();
 
 const DIFF_BETWEEN = Symbol.for('DIFF_BETWEEN');
@@ -92,6 +93,12 @@ const parseDiff = (str) => {
     return files;
 };
 
+const center = (str, char, len) => {
+    const sides = char.repeat(Math.max(Math.ceil((len - str.length) / 2), 0));
+
+    return sides ? (sides + str + sides).substr(0, len) : str;
+}
+
 module.exports = async (state) => {    
     console.clear();
     
@@ -105,9 +112,31 @@ module.exports = async (state) => {
 
     console.log(`Updated at ${(new Date()).toLocaleTimeString()}`);
 
-    return parseDiff(diff).filter(file => {
-        return !file.name.endsWith(`${moduleToBranch(state.module)}.md`);
-    }).forEach(file => {
+    const parsedDiff = parseDiff(diff);
+
+    const script = parsedDiff.find(file => file.name.endsWith(`${moduleToBranch(state.module)}.md`));
+
+    if (script) {
+        const fileLinkPattern = /\[[^\]]*\]\((\/[\/\\\w, .-]+):(\d+)-(\d+)\)/i; // [file.js](/path/to/file.js:1-5)
+
+        for (const group of script.deltas) {
+            for (const line of group.lines) {
+                const match = colors.reset(line).match(fileLinkPattern);
+    
+                if (match) {
+                    const [full, path, start, end] = match;
+    
+                    console.log(center(`< ${path}:${start}-${end} >`, '-', 80));
+    
+                    const lines = (await gitFs.readFile(path)).toString().split('\n');
+    
+                    console.log(lines.slice(start - 1, end - 1).join('\n').cyan);
+                }
+            }
+        }
+    }
+
+    parsedDiff.filter(file => file !== script).forEach(file => {
         console.log('='.repeat(80));
         console.log(file.rename
             ? `${colors.red(file.oldName)} -> ${colors.green(file.name)}`

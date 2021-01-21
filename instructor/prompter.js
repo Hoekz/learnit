@@ -20,6 +20,7 @@ function format(desc, showSymbols) {
         [/__([^_]+)__/g, (full, target) => showSymbols ? full.bold : target.bold],
         [/\*\*([^*]+)\*\*/g, (full, target) => showSymbols ? full.bold : target.bold],
         [/`([^`]+)`/g, (full, target) => showSymbols ? full.green : target.green],
+        [/(\[[^\]]*\])\([^\)]+\)/gi, (full, target) => showSymbols ? full.cyan : target.cyan],
     ];
 
     return rules.reduce((str, [pattern, sub]) => str.replace(pattern, sub), desc);
