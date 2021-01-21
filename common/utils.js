@@ -41,7 +41,10 @@ const chapterToBranch = (module, chapter) => {
 const branchToModule = (branch) => isBranch(branch) ? unapply(modulePattern, branch)[0] : branch;
 const branchToChapter = (branch) => isBranch(branch) ? unapply(chapterPattern, branch) : branch;
 
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 module.exports = {
     moduleToBranch, chapterToBranch,
     branchToModule, branchToChapter,
+    wait,
 };

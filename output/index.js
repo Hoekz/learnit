@@ -1,5 +1,6 @@
 const { getBranchConfig } = require('../cli/git-helpers');
 const { state, mapCourse } = require('../common/course');
+const status = require('../common/status');
 const Command = require('./command');
 const logDelta = require('./delta');
 
@@ -91,6 +92,7 @@ module.exports = {
     async command({ delta, noDelta }) {
         if (!delta || noDelta) {
             console.log('Loading all commands...');
+            status.connect('commands');
             await loadAllCommands();
             console.log(`Loaded ${allCommands.length} commands.`);
             // allCommands.forEach(cmd => console.log(cmd));
@@ -99,6 +101,7 @@ module.exports = {
         }
 
         if (delta || !noDelta) {
+            status.connect('delta');
             state.onSave(onChange(state.value, logDelta));
             logDelta(state.value);
         }

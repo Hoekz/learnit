@@ -64,6 +64,20 @@ const setBranchDescription = async (branch, value) => {
     return value;
 };
 
+const hasCommandConfig = async () => {
+    const configs = await git.listConfig();
+
+    if (!configs.files.includes('.git/config')) {
+        return false;
+    }
+
+    for (const key in configs.values['.git/config']) {
+        if (/^learnit\..*\.commands$/.test(key)) return true;
+    }
+
+    return false;
+};
+
 const getBranchConfig = async (branch) => {
     const configs = await git.listConfig();
     const config = {};
@@ -92,6 +106,7 @@ const deleteBranchSettings = async (branch) => {
 };
 
 module.exports = {
+    hasCommandConfig,
     getBranchConfig, setBranchValue, setBranchDescription, deleteBranchSettings,
     isExistingModule, getModule,
     isExistingChapter, chapterFrom, nextChapterIndex,
