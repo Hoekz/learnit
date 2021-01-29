@@ -6,9 +6,10 @@ const { chapterFrom, isExistingModule, isExistingChapter, getBranchConfig, getMo
 
 const git = simpleGit();
 
-async function step(message, cwd) {
-    await git.add(cwd || process.cwd());
-    await git.commit(`step: ${message}`, []);
+async function step(message, cwd = process.cwd()) {
+    if (process.cwd().endsWith(cwd))
+    await git.add(process.cwd().endsWith(cwd) ? process.cwd() : path.join(process.cwd(), cwd));
+    await git.commit(`step: ${message || (new Date()).toLocaleString()}`, []);
 }
 
 module.exports = {

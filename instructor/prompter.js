@@ -8,22 +8,61 @@ const settings = require('../common/settings');
 const navigate = require('./navigate');
 
 const { getModule, chapterFrom } = require('../cli/git-helpers');
+const { mapCourse } = require('../common/course');
 
 function locationString({ course, module, chapter, step }) {
     return ` ${[course, module, chapter, step].filter(e => e).join(' > ')} `;
 }
 
-function format(desc, showSymbols) {
+function format(desc, showSymbols, columns = 80) {
     const rules = [
+        [/(\[[^\]]*\])\([^\)]+\)/gi, (full, target) => showSymbols ? full.cyan : target.cyan],
         [/([^_])_([^_]+)_/g, (full, lead, target) => showSymbols ? full.italic : lead + target.italic],
         [/([^*])\*([^*]+)\*/g, (full, lead, target) => showSymbols ? full.italic : lead + target.italic],
         [/__([^_]+)__/g, (full, target) => showSymbols ? full.bold : target.bold],
         [/\*\*([^*]+)\*\*/g, (full, target) => showSymbols ? full.bold : target.bold],
         [/`([^`]+)`/g, (full, target) => showSymbols ? full.green : target.green],
-        [/(\[[^\]]*\])\([^\)]+\)/gi, (full, target) => showSymbols ? full.cyan : target.cyan],
     ];
 
-    return rules.reduce((str, [pattern, sub]) => str.replace(pattern, sub), desc);
+    const lines = rules.reduce((str, [pattern, sub]) => str.replace(pattern, sub), desc).split('\n');
+
+    return lines.reduce((output, line) => {
+        let lastLine = output.pop();
+
+        if (line === '') {
+            output.push(lastLine, '', '');
+        } else {
+            line.split(/(\s+)/g).forEach((wordOrSpace) => {
+                const len = (lastLine + wordOrSpace).strip.length;
+
+                if (/\s+/.test(wordOrSpace)) {
+                    if (len < columns) {
+                        lastLine += wordOrSpace;
+                    } else {
+                        output.push(lastLine);
+                        lastLine = '';
+                    }
+                } else {
+                    if (len < columns) {
+                        if (/\s+$/.test(lastLine) || !lastLine) {
+                            lastLine += wordOrSpace;
+                        } else {
+                            lastLine += ' ' + wordOrSpace;
+                        }
+                    } else {
+                        output.push(lastLine);
+                        lastLine = wordOrSpace;
+                    }
+                }
+            });
+
+            if (lastLine) {
+                output.push(lastLine);
+            }
+        }
+
+        return output;
+    }, ['']).join('\n');
 }
 
 const quit = {
@@ -33,20 +72,21 @@ const quit = {
 
 const prompt = async (description, options) => {
     if (!options.choices.length) {
-        console.log(description, 'has no choices');
+        console.log(description.length > 40 ? description.substr(0, 37) + '...' : description, 'has no choices');
         return { value: null };
     }
 
     const state = await course.getState();
+    const columns = process.stdout.columns || 80;
 
     console.clear();
-    console.log(locationString(state).bgWhite.black);
+    console.log((locationString(state) + ' '.repeat(columns)).substr(0, columns).bgWhite.black);
 
     if (description) {
         const markdownActive = (await settings.get('markdown.active')) === 'true';
         const markdownSymbols = (await settings.get('markdown.symbols')) === 'true';
 
-        console.log(markdownActive ? format(description, markdownSymbols) : description);
+        console.log(`\n${markdownActive ? format(description, markdownSymbols, columns) : description}\n`);
     }
 
     const { value } = await inquirer.prompt({
@@ -87,7 +127,7 @@ const chooseChapter = async (module) => {
     });
 };                    
 
-const navigateChapter = async ({ module, chapter, step }) => {
+const navigateChapter = async ({ module, chapter, step, commit }) => {
     const detailedModule = await getModule(module);
     const detailedChapter = await chapterFrom(module)(chapter);
     const script = await read(detailedModule);
@@ -126,11 +166,21 @@ const navigateChapter = async ({ module, chapter, step }) => {
         choices.unshift({ name: 'Next Step', value: 'next' });
     }
 
-    const scriptStep = scriptChapter.steps.find(s => s.name === step);
-
     const message = choices.length === 3 ? 'There is no other content in this chapter.' : 'Go to:';
+    const warning = '\t`WARNING: no matching step found in script.`';
 
-    return await prompt(scriptStep.description, { message, choices });
+    const scriptSteps = scriptChapter.steps.filter(s => s.name === step);
+
+    if (scriptSteps.length === 1) {
+        return await prompt(scriptSteps[0].description, { message, choices });
+    } else if (scriptSteps.length === 0) {
+        return await prompt(warning, { message, choices });
+    } else {
+        const matchingCommits = detailedChapter.steps.filter(c => c.message.replace('step: ', '') === step);
+        const trueStepIndex = matchingCommits.findIndex(c => c.hash === commit);
+
+        return await prompt(scriptSteps[trueStepIndex] ? scriptSteps[trueStepIndex].description : warning, { message, choices });
+    }
 };
 
 module.exports = { chooseModule, chooseChapter, navigateChapter };

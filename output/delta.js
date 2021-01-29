@@ -110,6 +110,8 @@ module.exports = async (state) => {
     // TODO: determine if diff should be calculated.
     const diff = await git.diff([`${state.commit}^!`]);
 
+    const columns = process.stdout.columns || 80;
+
     console.log(`Updated at ${(new Date()).toLocaleTimeString()}`);
 
     const parsedDiff = parseDiff(diff);
@@ -121,29 +123,33 @@ module.exports = async (state) => {
 
         for (const group of script.deltas) {
             for (const line of group.lines) {
+                if (line !== line.strip.green) {
+                    continue; // not a new line
+                }
+
                 const match = colors.reset(line).match(fileLinkPattern);
-    
+                
                 if (match) {
                     const [full, path, start, end] = match;
     
-                    console.log(center(`< ${path}:${start}-${end} >`, '-', 80));
+                    console.log(center(`< ${path}:${start}-${end} >`, '-', columns));
     
                     const lines = (await gitFs.readFile(path)).toString().split('\n');
     
-                    console.log(lines.slice(start - 1, end - 1).join('\n').cyan);
+                    console.log(lines.slice(start - 1, end).join('\n').cyan);
                 }
             }
         }
     }
 
     parsedDiff.filter(file => file !== script).forEach(file => {
-        console.log('='.repeat(80));
+        console.log('='.repeat(columns));
         console.log(file.rename
             ? `${colors.red(file.oldName)} -> ${colors.green(file.name)}`
             : colors.blue(file.name)
         );
         file.deltas.forEach(group => {
-            console.log('-'.repeat(80));
+            console.log('-'.repeat(columns));
             group.lines.forEach(line => console.log(line));
         });
     });

@@ -1,6 +1,6 @@
 const path = require('path');
-const { promises: fs } = require('fs');
 const inquirer = require('inquirer');
+const gitFs = require('./git-fs');
 const { getBranchConfig } = require('../cli/git-helpers');
 const { unrecognized } = require('./errors');
 
@@ -126,7 +126,7 @@ async function read({ value }) {
     const { cwd } = await getBranchConfig(value);
     const script = cwd ? path.join(cwd, value + '.md') : value + '.md';
 
-    const lines = (await fs.readFile(script, 'utf-8')).toString().split('\n');
+    const lines = (await gitFs.readFile(script, 'utf-8')).toString().split('\n');
 
     return parseMarkdown(lines);
 }
@@ -145,7 +145,7 @@ async function write({ value, name }, { description, chapters = [] }) {
         });
     });
     
-    await fs.writeFile(script, body, 'utf-8');
+    await gitFs.writeFile(script, body, 'utf-8');
 }
 
 async function setChapter(module, name, description) {

@@ -1,3 +1,4 @@
+const path = require('path');
 const inquirer = require('inquirer');
 const simpleGit = require('simple-git');
 const { getState, mapCourse } = require('../common/course');
@@ -11,8 +12,9 @@ const {
 
 const git = simpleGit();
 
-async function save(message, cwd) {
-    await git.add(cwd || process.cwd());
+async function save(message, cwd = process.cwd()) {
+    if (process.cwd().endsWith(cwd))
+    await git.add(process.cwd().endsWith(cwd) ? process.cwd() : path.join(process.cwd(), cwd));
     await git.commit(`save: ${message || (new Date()).toLocaleString()}`, []);
 }
 
@@ -268,7 +270,8 @@ module.exports = {
             const target = (await chapterFrom(module)(chapter));
 
             if (target) {
-                git.checkout(target.value);
+                await git.checkout(target.value);
+                await getState();
             } else {
                 console.log(`Unable to find match for '${chapter}'.`);
                 process.exit(1);

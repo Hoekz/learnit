@@ -210,6 +210,7 @@ module.exports = {
 
             if (target) {
                 await git.checkout(target.value);
+                await getState();
             } else {
                 console.log(`Unable to find match for '${chapter || module}'.`);
                 process.exit(1);

@@ -134,15 +134,6 @@ const getState = async () => {
     return { course, module: null, chapter: null, commit: null };
 };
 
-const isGitRepo = async () => {
-    try {
-        await gitFs.rootDirecotry();
-        return true;
-    } catch(e) {
-        return false;
-    }
-};
-
 module.exports = {
     state,
     getModules,
@@ -151,5 +142,4 @@ module.exports = {
     getCommits,
     getState: saveState,
     mapCourse,
-    isGitRepo,
 };

@@ -1,6 +1,6 @@
 const path = require('path');
 const simpleGit = require('simple-git');
-const { mapCourse, isGitRepo } = require('../common/course');
+const { mapCourse, getState } = require('../common/course');
 const { unrecognized, missing } = require('../common/errors');
 const { chapterToBranch } = require('../common/utils');
 const { isExistingModule, getModule, setBranchValue } = require('./git-helpers');
@@ -51,7 +51,7 @@ module.exports = {
         args: {},
         async command() {
             const dir = path.basename(process.cwd());
-            if (await isGitRepo()) {
+            if (await gitFs.isGitRepo()) {
                 console.log(`A repo already exists in ${dir}, checking .gitignore...`);
                 await ensureMain();
                 await ensureGitIgnore();
@@ -61,6 +61,9 @@ module.exports = {
                 try {
                     await git.init();
                     await ensureGitIgnore();
+                    const root = await gitFs.rootDirectory();
+                    await git.add(root);
+                    await git.commit('initial commit', []);
                     await git.branch(['-m', 'master', 'main']);
                 } catch (e) {
                     console.log('Unable to fully create repo:');
@@ -122,6 +125,7 @@ module.exports = {
         args: {},
         async command() {
             await git.checkout('main');
+            await getState();
         }
     },
 };
