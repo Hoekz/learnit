@@ -51,8 +51,10 @@ function parseMarkdown(lines) {
                         chapter.name = line.replace('## ', '').trim();
                         break;
                     } else {
+                        chapter.description = description.join('\n').trim();
                         script.chapters.push(chapter);
                         chapter = { steps: [] };
+                        description = [];
                         continue;
                     }
                 }

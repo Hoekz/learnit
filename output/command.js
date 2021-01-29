@@ -57,6 +57,8 @@ module.exports = class Command {
             windowsHide: true,
         });
         this.running = true;
+        this.emptyLine = true;
+
         console.log(`Command Starting: ${hash(this.run)(this.run)}`);
 
         this.process.on('error', (err) => {
@@ -80,9 +82,24 @@ module.exports = class Command {
     }
 
     log(data) {
-        const lines = data.toString().split('\n');
+        let str = data.toString();
+
+        if (!str.includes('\n') && !this.emptyLine) {
+            process.stdout.write(str);
+            return;
+        }
+
+        if (/^[ \t\v\f]*\n/.test(str) && !this.emptyLine) {
+            process.stdout.write('\n');
+            str = str.replace(/^[ \t\v\f]*\n/, '');
+            if (!str) return;
+        }
+
+        const lines = str.split('\n');
         const last = lines.pop();
         const withPrefix = lines.map(line => `${this.prefix} ${line}`).join('\n') + (last ? `${this.prefix} ${last}` : '\n');
+
+        this.emptyLine = !last || last === '\n';
 
         process.stdout.write(withPrefix);
     }
