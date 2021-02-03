@@ -269,6 +269,7 @@ For consumers:
  - `learnit bookmark` - not started, allows user to set up a quick return point
  - `learnit annotate` - not started, allows user to save changes they made
  - `learnit settings` - not started, allows user to configure setup, such as soft stepping so that deltas are visible to outside programs.
+ - `learnit download` - rough draft complete, allows user to download courses and updates.
  - mark course/module/chapter as complete - started, have mechanism for keeping track of progress
 
 For both:

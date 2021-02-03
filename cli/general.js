@@ -6,6 +6,7 @@ const { getBranchConfig, chapterFrom, getModule, setBranchValue } = require('./g
 const courses = require('./courses');
 const modules = require('./modules');
 const chapters = require('./chapters');
+const { isGitRepo } = require('../common/git-fs');
 
 const git = simpleGit();
 
@@ -66,6 +67,41 @@ module.exports = {
             const baseArgs = ['-u', 'origin', '--all'];
             await git.push(soft ? baseArgs : [...baseArgs, '--force-with-lease']);
         }
+    },
+    download: {
+        description: 'Download the latest version of a course.',
+        args: {
+            from: {
+                description: 'Remote location to pull the repository from. Only necessary when downloading for the first time.',
+                type: 'STR',
+                named: false,
+                optional: true,
+            },
+        },
+        async command({ from }) {
+            if (await isGitRepo()) {
+                if (from) {
+                    console.error('You are already inside a repository. If you are downloading a new course, use a different directory.');
+                    console.error('If you are trying to retrieve the latest version, run `learnit download`.');
+                    process.exit(1);
+                }
+
+                console.log('Fetching latest version...');
+                const { branches } = await git.fetch();
+
+                for (const { name } of branches) {
+                    console.log(`Updating ${name}...`);
+                    await git.mergeFromTo(`origin/${name}`, name, ['--ff-only']);
+                }
+
+                console.log('Download complete.');
+                process.exit();
+            }
+
+            if (from) {
+                console.log(await git.clone(from));
+            }
+        },
     },
     rebase: {
         description: 'Recursively rebase all dependent branches.',
