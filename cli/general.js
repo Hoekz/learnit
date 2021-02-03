@@ -63,7 +63,8 @@ module.exports = {
                 await git.addRemote('origin', to);
             }
 
-            await git.push(soft ? null : ['--force-with-lease']);
+            const baseArgs = ['-u', 'origin', '--all'];
+            await git.push(soft ? baseArgs : [...baseArgs, '--force-with-lease']);
         }
     },
     rebase: {

@@ -76,11 +76,6 @@ module.exports = {
 
             await git.checkout(actualModule.value);
 
-            const { cwd } = await getBranchConfig.module(module);
-            await setChapter(actualModule, chapter, await scriptFor(chapter));
-            console.log(`Script updated.`);
-            await save(`initial commit for ${chapter}.`, cwd);
-
             const newBranch = chapterToBranch(module || state.module, chapter);
             
             await git.checkoutBranch(newBranch, actualModule.value);
@@ -89,6 +84,11 @@ module.exports = {
             if (merge !== undefined) {
                 await setBranchValue(newBranch, 'merge', !!merge);
             }
+
+            const { cwd } = await getBranchConfig.module(module);
+            await setChapter(actualModule, chapter, await scriptFor(chapter));
+            console.log(`Script updated.`);
+            await save(`initial commit for ${chapter}.`, cwd);
         },
     },
     delete: {

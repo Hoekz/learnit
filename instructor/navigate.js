@@ -14,10 +14,14 @@ const setChapter = async (module, chapter) => {
         return goTo(commit);
     }
 
-    const chapterBranch = chapterToBranch(module, chapter);
-    const commits = await course.getCommits(moduleToBranch(module), chapterBranch);
+    const steps = await course.getSteps(module, chapter);
 
-    return goTo(commits.length ? commits[commits.length - 1].hash : chapterBranch);
+    if (!steps.length) {
+        return goTo(chapterToBranch(module, chapter));
+    }
+
+    const previousCommit = await git.revparse([steps[0].hash + '^']);
+    return goTo(previousCommit);
 };
 
 const nextStep = async () => {

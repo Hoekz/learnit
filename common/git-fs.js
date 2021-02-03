@@ -19,10 +19,9 @@ const wrap = (fn, promise = true) => async (file, ...args) => {
     return base[fn](path.join(root, file), ...args);
 };
 
-const isGitRepo = () => rootDirectory().then(() => true).catch(() => false);
-
 module.exports = {
-    isGitRepo,
+    isGitRepo: () => git.checkIsRepo(),
+    isRoot: () => git.checkIsRepo('root'),
     rootDirectory,
     mkdir: wrap('mkdir'),
     watch: wrap('watch', false),

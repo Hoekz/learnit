@@ -10,8 +10,8 @@ const navigate = require('./navigate');
 const { getModule, chapterFrom } = require('../cli/git-helpers');
 const { mapCourse } = require('../common/course');
 
-function locationString({ course, module, chapter, step }) {
-    return ` ${[course, module, chapter, step].filter(e => e).join(' > ')} `;
+function locationString({ course, module, chapter, step, commit }) {
+    return ` ${[course, module, chapter, step, commit].filter(e => e).join(' > ')} `;
 }
 
 function format(desc, showSymbols, columns = 80) {
@@ -29,7 +29,9 @@ function format(desc, showSymbols, columns = 80) {
     return lines.reduce((output, line) => {
         let lastLine = output.pop();
 
-        if (line === '') {
+        if (line.trim().startsWith('-')) {
+            output.push(...(lastLine ? [lastLine, line] : [line]));
+        } else if (line === '') {
             output.push(lastLine, '', '');
         } else {
             line.split(/(\s+)/g).forEach((wordOrSpace) => {
