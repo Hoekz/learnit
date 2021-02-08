@@ -1,3 +1,4 @@
+const path = require('path');
 const simpleGit = require('simple-git');
 const { getState } = require('../common/course');
 const settings = require('../common/settings');
@@ -6,7 +7,7 @@ const { getBranchConfig, chapterFrom, getModule, setBranchValue } = require('./g
 const courses = require('./courses');
 const modules = require('./modules');
 const chapters = require('./chapters');
-const { isGitRepo } = require('../common/git-fs');
+const { isGitRepo, rootDirectory } = require('../common/git-fs');
 
 const git = simpleGit();
 
@@ -26,10 +27,12 @@ module.exports = {
 
             const { cwd } = module ? await getBranchConfig.module(module) : {};
 
-            if (process.cwd().endsWith(cwd)) {
-                await git.add('.');
+            const root = await rootDirectory();
+
+            if (cwd) {
+                await git.add(path.join(root, cwd));
             } else {
-                await git.add(cwd || process.cwd());
+                await git.add(root);
             }
 
             await git.commit(`save: ${message || (new Date()).toLocaleString()}`, []);

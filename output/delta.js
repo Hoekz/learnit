@@ -119,7 +119,7 @@ module.exports = async (state) => {
     const script = parsedDiff.find(file => file.name.endsWith(`${moduleToBranch(state.module)}.md`));
 
     if (script) {
-        const fileLinkPattern = /\[[^\]]*\]\((\/[\/\\\w, .-]+):(\d+)-(\d+)\)/i; // [file.js](/path/to/file.js:1-5)
+        const fileLinkPattern = /\[[^\]]*\]\((\/[\/\\\w, .-]+)#L(\d+)-(\d+)\)/i; // [file.js](/path/to/file.js#L1-5)
 
         for (const group of script.deltas) {
             for (const line of group.lines) {

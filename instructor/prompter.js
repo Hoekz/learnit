@@ -8,7 +8,6 @@ const settings = require('../common/settings');
 const navigate = require('./navigate');
 
 const { getModule, chapterFrom } = require('../cli/git-helpers');
-const { mapCourse } = require('../common/course');
 
 function locationString({ course, module, chapter, step, commit }) {
     return ` ${[course, module, chapter, step, commit].filter(e => e).join(' > ')} `;

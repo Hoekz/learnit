@@ -261,6 +261,10 @@ For creators:
  - `learnit rebase` - not started, rebase all branches intelligently (for changes to `main` that need to be everywhere)
  - `learnit squash-scripts` - not started, collapses all changes to scripts to single commit so it does not change dynamically.
 
+Bugs:
+ - `goto`, `list`, `download` - needs to account for remote branches
+ - git config is not sent to remote, need command to dump, push and restore when completed
+
 For consumers:
 
  - `learnit start`- mostly complete.
