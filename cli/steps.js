@@ -1,14 +1,17 @@
+const path = require('path');
 const simpleGit = require('simple-git');
 const { getState } = require('../common/course');
 const { unrecognized } = require('../common/errors');
+const gitFs = require('../common/git-fs');
 const { scriptFor, addStep } = require('../common/script');
 const { chapterFrom, isExistingModule, isExistingChapter, getBranchConfig, getModule } = require('./git-helpers');
 
 const git = simpleGit();
 
-async function step(message, cwd = process.cwd()) {
-    if (process.cwd().endsWith(cwd))
-    await git.add(process.cwd().endsWith(cwd) ? process.cwd() : path.join(process.cwd(), cwd));
+async function step(message, cwd) {
+    const root = await gitFs.rootDirectory();
+
+    await git.add(cwd ? path.join(root, cwd) : root);
     await git.commit(`step: ${message || (new Date()).toLocaleString()}`, []);
 }
 
