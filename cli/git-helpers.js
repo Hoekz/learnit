@@ -1,5 +1,6 @@
 const simpleGit = require('simple-git');
 const { mapCourse } = require('../common/course');
+const gitFs = require('../common/git-fs');
 
 const git = simpleGit();
 
@@ -105,9 +106,42 @@ const deleteBranchSettings = async (branch) => {
     await git.raw('config', '--unset', `branch.${branch}.description`);
 };
 
+const saveConfig = async () => {
+    const configs = await git.listConfig();
+    const config = {};
+
+    if (!configs.files.includes('.git/config')) {
+        return;
+    }
+
+    for (const [key, value] of Object.entries(configs.values['.git/config'])) {
+        if (key.startsWith('learnit.') || (key.startsWith('branch.') && key.endsWith('.description'))) {
+            config[key] = value;
+        }
+    }
+
+    await gitFs.writeFile('learnit.config.json', JSON.stringify(config));
+};
+
+const loadConfig = async () => {
+    let config;
+
+    try {
+        config = JSON.parse(await gitFs.readFile('learnit.config.json'));
+    } catch (e) {
+        console.log('Either no config file found to load from or there was a problem parsing.');
+        process.exit();
+    }
+
+    for (const [key, value] of Object.entries(config)) {
+        await git.addConfig(key, value);
+    }
+};
+
 module.exports = {
     hasCommandConfig,
-    getBranchConfig, setBranchValue, setBranchDescription, deleteBranchSettings,
+    getBranchConfig, saveConfig, loadConfig,
+    setBranchValue, setBranchDescription, deleteBranchSettings,
     isExistingModule, getModule,
     isExistingChapter, chapterFrom, nextChapterIndex,
     isExistingStep, lastStepFrom, stepFrom,

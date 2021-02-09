@@ -28,4 +28,5 @@ module.exports = {
     writeFile: wrap('writeFile'),
     readFile: wrap('readFile'),
     access: wrap('access'),
+    rm: wrap('rm'),
 };

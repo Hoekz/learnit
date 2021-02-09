@@ -2,14 +2,36 @@ const path = require('path');
 const simpleGit = require('simple-git');
 const { getState } = require('../common/course');
 const settings = require('../common/settings');
-const { getBranchConfig, chapterFrom, getModule, setBranchValue } = require('./git-helpers');
+const { getBranchConfig, chapterFrom, getModule, setBranchValue, saveConfig, loadConfig } = require('./git-helpers');
 
 const courses = require('./courses');
 const modules = require('./modules');
 const chapters = require('./chapters');
 const { isGitRepo, rootDirectory } = require('../common/git-fs');
+const gitFs = require('../common/git-fs');
 
 const git = simpleGit();
+
+async function mergeAllRemote() {
+    const { branches } = await git.fetch();
+
+    for (const { name } of branches) {
+        console.log(`Updating ${name}...`);
+        await git.mergeFromTo(`origin/${name}`, name, ['--ff-only']);
+    }
+}
+
+async function trackAllRemote() {
+    const { all } = await git.branch(['--all']);
+
+    for (const branch of all) {
+        const local = branch.replace('remotes/origin/', '');
+        if (!all.includes(local)) {
+            console.log(`Adding ${local}...`);
+            await git.branch(['--track', local, branch]);
+        }
+    }
+}
 
 module.exports = {
     save: {
@@ -90,12 +112,9 @@ module.exports = {
                 }
 
                 console.log('Fetching latest version...');
-                const { branches } = await git.fetch();
 
-                for (const { name } of branches) {
-                    console.log(`Updating ${name}...`);
-                    await git.mergeFromTo(`origin/${name}`, name, ['--ff-only']);
-                }
+                await mergeAllRemote();
+                await trackAllRemote();
 
                 console.log('Download complete.');
                 process.exit();
@@ -103,6 +122,10 @@ module.exports = {
 
             if (from) {
                 console.log(await git.clone(from));
+
+                await trackAllRemote();
+
+                console.log('Download complete.');
             }
         },
     },
@@ -126,18 +149,46 @@ module.exports = {
         chapter: chapters.goto,
     },
     config: {
-        description: 'Shows the configuration of the current branch.',
-        args: {},
-        async command() {
-            const { module, chapter } = await getState();
+        description: 'Shows the configuration of the current branch. Optionally dumps or loads full config from file.',
+        args: {
+            dump: {
+                description: `Flag to dump full config to 'learnit.config.json'.`,
+                type: 'BOOL',
+                named: true,
+                optional: true,
+            },
+            load: {
+                description: `Flag to load full config from 'learnit.config.json'.`,
+                type: 'BOOL',
+                named: true,
+                optional: true,
+            },
+        },
+        async command({ dump, load }) {
+            if (!dump && !load) {
+                const { module, chapter } = await getState();
+    
+                if (!module) {
+                    printConfig('course', await getBranchConfig('main'));
+                    process.exit();
+                }
+    
+                const branch = (await (chapter ? chapterFrom(module)(chapter) : getModule(module))).value;
+                printConfig(chapter || module, await getBranchConfig(branch));
+            }
 
-            if (!module) {
-                printConfig('course', await getBranchConfig('main'));
+            if (dump) {
+                await saveConfig();
+                console.log(`Config values saved to 'learnit.config.json'.`);
                 process.exit();
             }
 
-            const branch = (await (chapter ? chapterFrom(module)(chapter) : getModule(module))).value;
-            printConfig(chapter || module, await getBranchConfig(branch));
+            if (load) {
+                await loadConfig();
+                console.log(`Config values loaded from 'learnit.config.json'.`);
+                await gitFs.rm('learnit.config.json');
+                process.exit();
+            }
         },
     },
     settings: {

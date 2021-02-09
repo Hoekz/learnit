@@ -261,10 +261,6 @@ For creators:
  - `learnit rebase` - not started, rebase all branches intelligently (for changes to `main` that need to be everywhere)
  - `learnit squash-scripts` - not started, collapses all changes to scripts to single commit so it does not change dynamically.
 
-Bugs:
- - `goto`, `list`, `download` - needs to account for remote branches
- - git config is not sent to remote, need command to dump, push and restore when completed
-
 For consumers:
 
  - `learnit start`- mostly complete.
@@ -273,7 +269,7 @@ For consumers:
  - `learnit bookmark` - not started, allows user to set up a quick return point
  - `learnit annotate` - not started, allows user to save changes they made
  - `learnit settings` - not started, allows user to configure setup, such as soft stepping so that deltas are visible to outside programs.
- - `learnit download` - rough draft complete, allows user to download courses and updates.
+ - `learnit download` - rough draft complete, allows user to download courses and updates, synchronizes branch structure.
  - mark course/module/chapter as complete - started, have mechanism for keeping track of progress
 
 For both:
