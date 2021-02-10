@@ -268,7 +268,7 @@ For consumers:
  - `learnit reset` - not started, erases all progress, resets to `main`
  - `learnit bookmark` - not started, allows user to set up a quick return point
  - `learnit annotate` - not started, allows user to save changes they made
- - `learnit settings` - not started, allows user to configure setup, such as soft stepping so that deltas are visible to outside programs.
+ - `learnit settings` - started, allows user to configure setup, such as soft stepping so that deltas are visible to outside programs, collapse horizontal spacing, collapse vertical spacing, etc.
  - `learnit download` - rough draft complete, allows user to download courses and updates, synchronizes branch structure.
  - mark course/module/chapter as complete - started, have mechanism for keeping track of progress
 

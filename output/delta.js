@@ -119,7 +119,7 @@ module.exports = async (state) => {
     const script = parsedDiff.find(file => file.name.endsWith(`${moduleToBranch(state.module)}.md`));
 
     if (script) {
-        const fileLinkPattern = /\[[^\]]*\]\((\/[\/\\\w, .-]+)#L(\d+)-(\d+)\)/i; // [file.js](/path/to/file.js#L1-5)
+        const fileLinkPattern = /\[[^\]]*\]\((\/[\/\\\w, .-]+)#L(\d+)-(\d+)\)/gi; // [file.js](/path/to/file.js#L1-5)
 
         for (const group of script.deltas) {
             for (const line of group.lines) {
@@ -127,9 +127,9 @@ module.exports = async (state) => {
                     continue; // not a new line
                 }
 
-                const match = colors.reset(line).match(fileLinkPattern);
+                const matches = colors.reset(line).matchAll(fileLinkPattern);
                 
-                if (match) {
+                for (const match of matches) {
                     const [full, path, start, end] = match;
     
                     console.log(center(`< ${path}:${start}-${end} >`, '-', columns));
