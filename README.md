@@ -239,7 +239,7 @@ For creators:
  - `learnit new module` - completed.
  - `learnit new chapter` - completed.
  - `learnit new step` - completed.
- - `learnit new command` - completed.
+ - `learnit new command` - completed. Added background and single run commands.
  - `learnit update step` - completed.
  - `learnit revert step` - completed.
  - `learnit delete module` - completed. Need to delete config values.

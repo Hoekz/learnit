@@ -1,15 +1,57 @@
 const { spawn } = require('child_process');
 const colors = require('colors');
-const { getModule, chapterFrom, stepFrom } = require("../cli/git-helpers");
+const { getModule, chapterFrom, stepFrom } = require('../cli/git-helpers');
+const Saveable = require('../common/saveable');
+
+const commandHistory = new Saveable('command-history', {});
+
+function hasRun({ run, module, chapter, step }) {
+    let readAt = commandHistory.value;
+
+    if (module) {
+        readAt = readAt[module] = readAt[module] || {};
+    }
+
+    if (chapter) {
+        readAt = readAt[chapter] = readAt[chapter] || {};
+    }
+
+    if (step) {
+        readAt = readAt[step] = readAt[step] || {};
+    }
+    
+    return run in readAt;
+}
+
+async function updateRunCount({ run, module, chapter, step }) {
+    let setAt = commandHistory.value;
+
+    if (module) {
+        setAt = setAt[module] = setAt[module] || {};
+    }
+
+    if (chapter) {
+        setAt = setAt[chapter] = setAt[chapter] || {};
+    }
+
+    if (step) {
+        setAt = setAt[step] = setAt[step] || {};
+    }
+    
+    setAt[run] = (setAt[run] || 0) + 1;
+    await commandHistory.save();
+}
 
 const colorTable = ['red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'gray'].map(c => colors[c]);
 
 const hash = (str) => colorTable[str.split('').reduce((n, c) => (n * 59 + c.charCodeAt()) % colorTable.length, str.length)];
 
 module.exports = class Command {
-    constructor({ run, refresh, cwd, prefix, module, chapter, step }) {
+    constructor({ run, refresh, silent, once, cwd, prefix, module, chapter, step }) {
         this.run = run;
         this.refresh = refresh;
+        this.silent = silent;
+        this.once = once;
         this.cwd = cwd;
 
         this.module = module;
@@ -50,6 +92,14 @@ module.exports = class Command {
     }
 
     async start() {
+        await commandHistory.ready;
+
+        if (this.once && hasRun(this)) {
+            return;
+        }
+
+        await updateRunCount(this);
+        
         this.process = spawn(this.run, {
             cwd: this.cwd,
             shell: true,
@@ -82,6 +132,10 @@ module.exports = class Command {
     }
 
     log(data) {
+        if (this.silent) {
+            return;
+        }
+
         let str = data.toString();
 
         if (!str.includes('\n') && !this.emptyLine) {

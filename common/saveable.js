@@ -39,6 +39,11 @@ module.exports = class Saveable {
         this.hasFile = false;
         this.read = false;
         this.value = defaultValue;
+
+        let resolve;
+        this.ready = new Promise(res => resolve = res);
+        this.ready.resolve = resolve;
+
         this.readFile();
     }
     
@@ -57,6 +62,7 @@ module.exports = class Saveable {
         }
 
         this.read = true;
+        this.ready.resolve();
         if (this.listeners.length) this.watch();
     }
 

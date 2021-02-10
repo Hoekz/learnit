@@ -7,13 +7,15 @@ const {
     getModule, chapterFrom
 } = require('./git-helpers');
 
-const addCommandToBranch = async (branch, command, reloadOnStep, cwd, label) => {
+const addCommandToBranch = async (branch, command, reloadOnStep, cwd, label, silent, once) => {
     const config = await getBranchConfig(branch);
     await setBranchValue(branch, 'commands', [...(config.commands || []), {
         run: command,
         refresh: !!reloadOnStep,
         cwd: cwd || config.cwd || process.cwd(),
         prefix: label,
+        silent,
+        once,
     }]);
 };
 
@@ -73,9 +75,21 @@ module.exports = {
             named: true,
             hint: '<label>',
             optional: true,
-        }
+        },
+        silent: {
+            description: 'Indicate that the command should run silently.',
+            type: 'BOOL',
+            named: true,
+            optional: true,
+        },
+        once: {
+            description: 'Indicate that the command only needs to run once.',
+            type: 'BOOL',
+            named: true,
+            optional: true,
+        },
     },
-    async command({ command, module, chapter, step, atCurrent, reloadOnStep, cwd, label }) {
+    async command({ command, module, chapter, step, atCurrent, reloadOnStep, cwd, label, silent, once }) {
         if (atCurrent) {
             state = await getState();
             module = state.module;
@@ -92,7 +106,7 @@ module.exports = {
             })).value;
             
             if (confirm) {
-                await addCommandToBranch('main', command, reloadOnStep, cwd, label);
+                await addCommandToBranch('main', command, reloadOnStep, cwd, label, silent, once);
             }
 
             process.exit();
@@ -104,7 +118,7 @@ module.exports = {
 
         if (!chapter || atCurrent === 'module') {
             const { value } = await getModule(module);
-            await addCommandToBranch(value, command, reloadOnStep, cwd, label);
+            await addCommandToBranch(value, command, reloadOnStep, cwd, label, silent, once);
             process.exit();
         }
 
@@ -115,7 +129,7 @@ module.exports = {
         const { value } = await chapterFrom(module)(chapter);
 
         if (!step || atCurrent === 'chapter') {
-            await addCommandToBranch(value, command, reloadOnStep, cwd, label);
+            await addCommandToBranch(value, command, reloadOnStep, cwd, label, silent, once);
             process.exit();
         }
 
@@ -123,6 +137,6 @@ module.exports = {
             unrecognized.step(step);
         }
 
-        await addCommandToBranch(`${value}.${step}`, command, false, cwd, label);
+        await addCommandToBranch(`${value}.${step}`, command, false, cwd, label, silent, once);
     },
 };
