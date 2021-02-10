@@ -195,7 +195,7 @@ module.exports = {
                 description: 'The branch or name of the module to navigate to.',
                 type: 'STR',
                 named: false,
-                optional: false,
+                optional: true,
             },
             chapter: {
                 description: 'The branch or name of the chapter inside the module to navigate to.',
@@ -206,6 +206,7 @@ module.exports = {
             },
         },
         async command({ module, chapter }) {
+            module = module || (await getState()).module;
             const target = (await (chapter ? chapterFrom(module)(chapter) : getModule(module)));
 
             if (target) {
