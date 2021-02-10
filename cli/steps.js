@@ -25,25 +25,15 @@ module.exports = {
                 named: false,
                 optional: true,
             },
-            module: {
-                description: 'The module in which to create the step.',
-                type: 'STR',
+            skipScript: {
+                description: 'Flag to not prompt for script.',
+                type: 'BOOL',
                 named: true,
-                hint: '<module_branch_or_name>',
                 optional: true,
-            },
-            chapter: {
-                description: 'The chapter in which to create the step.',
-                type: 'STR',
-                named: true,
-                hint: '<chapter_branch_or_name>',
-                optional: true,
-            },
+            }
         },
-        async command({ label, module, chapter }) {
-            const state = await getState();
-            module = module || state.module;
-            chapter = chapter || state.chapter;
+        async command({ label, skipScript }) {
+            const { module, chapter } = await getState();
 
             if (!await isExistingModule(module)) {
                 unrecognized.module(module);
@@ -59,8 +49,10 @@ module.exports = {
 
             const { cwd } = await getBranchConfig.module(module);
 
-            await addStep(moduleDetails, chapterDetails, label, await scriptFor(label));
-            console.log('Script updated.');
+            if (!skipScript) {
+                await addStep(moduleDetails, chapterDetails, label, await scriptFor(label));
+                console.log('Script updated.');
+            }
 
             await step(label, cwd);
         },
@@ -77,8 +69,9 @@ module.exports = {
             }
 
             const { cwd } = await getBranchConfig.module(module);
+            const root = await gitFs.rootDirectory();
 
-            await git.add([cwd || '.']);
+            await git.add([cwd ? path.join(root, cwd) : root]);
             await git.raw(['commit', '--amend', '--no-edit']);
         },
     },
