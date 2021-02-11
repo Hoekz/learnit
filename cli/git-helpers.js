@@ -120,7 +120,7 @@ const saveConfig = async () => {
         }
     }
 
-    await gitFs.writeFile('learnit.config.json', JSON.stringify(config));
+    await gitFs.writeFile('learnit.config.json', JSON.stringify(config, null, 4));
 };
 
 const loadConfig = async () => {
