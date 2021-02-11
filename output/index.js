@@ -9,6 +9,12 @@ const allCommands = [];
 const loadAllCommands = async () => {
     const course = await mapCourse();
 
+    const { commands } = await getBranchConfig('main');
+
+    if (commands && commands.length) {
+        commands.forEach((cmd) => allCommands.push(new Command({ ...cmd })));
+    }
+
     for (const module of course) {
         const { commands } = await getBranchConfig(module.value);
 
