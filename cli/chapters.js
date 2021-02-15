@@ -1,6 +1,7 @@
 const path = require('path');
 const inquirer = require('inquirer');
 const simpleGit = require('simple-git');
+const gitFs = require('../common/git-fs');
 const { getState, mapCourse } = require('../common/course');
 const { unrecognized } = require('../common/errors');
 const { scriptFor, setChapter } = require('../common/script');
@@ -12,9 +13,10 @@ const {
 
 const git = simpleGit();
 
-async function save(message, cwd = process.cwd()) {
-    if (process.cwd().endsWith(cwd))
-    await git.add(process.cwd().endsWith(cwd) ? process.cwd() : path.join(process.cwd(), cwd));
+async function save(message, cwd) {
+    const root = await gitFs.rootDirectory();
+
+    await git.add(cwd ? path.join(root, cwd) : root);
     await git.commit(`save: ${message || (new Date()).toLocaleString()}`, []);
 }
 
