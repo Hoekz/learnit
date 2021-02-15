@@ -2,13 +2,21 @@ const fs = require('fs');
 const path = require('path');
 const gitFs = require('./git-fs');
 
+const ensureLearnitDir = () => {
+    if (ensureLearnitDir.promise) {
+        return ensureLearnitDir.promise;
+    }
+    
+    return ensureLearnitDir.promise = gitFs.mkdir('.learnit').catch(e => e);
+};
+
 module.exports = {
-    async connect(name) {
+    async connect(name) {        
+        await ensureLearnitDir();
+        await gitFs.writeFile(`.learnit/${name}`, 'on', 'utf8');
+
         const directory = await gitFs.rootDirectory();
-
         const file = path.join(directory, `.learnit/${name}`);
-
-        fs.writeFileSync(file, 'on', 'utf8');
 
         const turnOff = () => {
             fs.writeFileSync(file, 'off');

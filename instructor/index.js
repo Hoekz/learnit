@@ -5,6 +5,7 @@ const course = require('../common/course');
 const status = require('../common/status');
 const { wait } = require('../common/utils');
 const { hasCommandConfig } = require('../cli/git-helpers');
+const gitFs = require('../common/git-fs');
 
 async function next() {
     const state = await course.getState();
@@ -50,6 +51,13 @@ module.exports = {
     args: {},
     async command() {
         let ableToNavigate = true;
+
+        try {
+            await gitFs.access('learnit.config.json');
+            console.log(`Detected 'learnit.config.json'. Run 'learnit config --load' to ensure course is properly configured.`);
+            process.exit(1);
+        } catch (e) {}
+
         status.connect('instructor');
 
         const deltaRunning = await status.check('delta');
