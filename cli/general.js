@@ -121,7 +121,8 @@ module.exports = {
             }
 
             if (from) {
-                console.log(await git.clone(from));
+                await git.clone(from);
+                await git.cwd(path.parse(from).name);
 
                 await trackAllRemote();
 
