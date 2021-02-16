@@ -1,6 +1,8 @@
+const path = require('path');
 const { spawn } = require('child_process');
 const colors = require('colors');
 const { getModule, chapterFrom, stepFrom } = require('../cli/git-helpers');
+const gitFs = require('../common/git-fs');
 const Saveable = require('../common/saveable');
 
 const commandHistory = new Saveable('command-history', {});
@@ -99,6 +101,7 @@ module.exports = class Command {
 
     async start() {
         await commandHistory.ready;
+        const root = await gitFs.rootDirectory();
 
         if (this.once && hasRun(this)) {
             return;
@@ -107,7 +110,7 @@ module.exports = class Command {
         await updateRunCount(this);
         
         this.process = spawn(this.run, {
-            cwd: this.cwd,
+            cwd: path.join(root, this.cwd),
             shell: true,
             maxBuffer: 5 * Math.pow(2, 20),
             windowsHide: true,
