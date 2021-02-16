@@ -12,7 +12,7 @@ const addCommandToBranch = async (branch, command, reloadOnStep, cwd, label, sil
     await setBranchValue(branch, 'commands', [...(config.commands || []), {
         run: command,
         refresh: !!reloadOnStep,
-        cwd: cwd || config.cwd || process.cwd(),
+        cwd: cwd || config.cwd || '',
         prefix: label,
         silent,
         once,
@@ -126,10 +126,11 @@ module.exports = {
             unrecognized.chapter(chapter);
         }
 
+        const moduleConfig = await getBranchConfig.module(module);
         const { value } = await chapterFrom(module)(chapter);
 
         if (!step || atCurrent === 'chapter') {
-            await addCommandToBranch(value, command, reloadOnStep, cwd, label, silent, once);
+            await addCommandToBranch(value, command, reloadOnStep, cwd || moduleConfig.cwd, label, silent, once);
             process.exit();
         }
 
@@ -137,6 +138,6 @@ module.exports = {
             unrecognized.step(step);
         }
 
-        await addCommandToBranch(`${value}.${step}`, command, false, cwd, label, silent, once);
+        await addCommandToBranch(`${value}.${step}`, command, false, cwd || moduleConfig.cwd, label, silent, once);
     },
 };

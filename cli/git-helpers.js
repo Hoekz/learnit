@@ -106,7 +106,7 @@ const deleteBranchSettings = async (branch) => {
     await git.raw('config', '--unset', `branch.${branch}.description`);
 };
 
-const saveConfig = async () => {
+const fullConfig = async () => {
     const configs = await git.listConfig();
     const config = {};
 
@@ -120,19 +120,32 @@ const saveConfig = async () => {
         }
     }
 
+    return config;
+};
+
+const saveConfig = async () => {
+    const config = await fullConfig();
+
     await gitFs.writeFile('learnit.config.json', JSON.stringify(config, null, 4));
 };
 
 const loadConfig = async () => {
-    let config;
+    let config, existing;
 
     try {
         config = JSON.parse(await gitFs.readFile('learnit.config.json'));
+        existing = await fullConfig();
     } catch (e) {
         console.log('Either no config file found to load from or there was a problem parsing.');
         process.exit();
     }
 
+    for (const key in existing) {
+        if (!(key in config)) {
+            await git.raw('config', '--unset', key);
+        }
+    }
+    
     for (const [key, value] of Object.entries(config)) {
         await git.addConfig(key, value);
     }

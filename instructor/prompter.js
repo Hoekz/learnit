@@ -14,8 +14,13 @@ function locationString({ course, module, chapter, step }) {
 }
 
 function format(desc, showSymbols, columns = 80) {
+    const links = [];
+
     const rules = [
-        [/(\[[^\]]*\])\([^\)]+\)/gi, (full, target) => showSymbols ? full.cyan : target.cyan],
+        [/(\[[^\]]*\])\(([^\)]+)\)/gi, (full, target, link) => {
+            links.push({ target, link });
+            return showSymbols ? full.cyan : target.cyan;
+        }],
         [/([^_])_([^_]+)_/g, (full, lead, target) => showSymbols ? full.italic : lead + target.italic],
         [/([^*])\*([^*]+)\*/g, (full, lead, target) => showSymbols ? full.italic : lead + target.italic],
         [/__([^_]+)__/g, (full, target) => showSymbols ? full.bold : target.bold],
@@ -24,6 +29,8 @@ function format(desc, showSymbols, columns = 80) {
     ];
 
     const lines = rules.reduce((str, [pattern, sub]) => str.replace(pattern, sub), desc).split('\n');
+
+    const linksOutput = links.length ? ('\n\n' + links.map(({ target, link }) => `${target} - ${link}`).join('\n')) : '';
 
     return lines.reduce((output, line) => {
         let lastLine = output.pop();
@@ -63,7 +70,7 @@ function format(desc, showSymbols, columns = 80) {
         }
 
         return output;
-    }, ['']).join('\n');
+    }, ['']).join('\n') + linksOutput;
 }
 
 const quit = {

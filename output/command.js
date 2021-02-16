@@ -76,17 +76,23 @@ module.exports = class Command {
             return true;
         }
 
-        const matchModule = module === (await getModule(this.module)).name;
+        if (!module) return false;
+
+        const matchModule = module.toLowerCase() === (await getModule(this.module)).name.toLowerCase();
 
         if (!this.chapter || !matchModule) {
             return matchModule;
         }
 
-        const matchChapter = chapter === (await chapterFrom(this.module)(this.chapter)).name;
+        if (!chapter) return false;
+
+        const matchChapter = chapter.toLowerCase() === (await chapterFrom(this.module)(this.chapter)).name.toLowerCase();
 
         if (!this.step || !matchChapter) {
             return matchChapter;
         }
+
+        if (!step) return false;
 
         return step === (await stepFrom(this.module, this.chapter, this.step)).message.replace(/^step: /, '');
     }
