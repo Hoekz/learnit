@@ -1,16 +1,19 @@
 #!/usr/bin/env node
 
-const courses = require('./courses');
-const modules = require('./modules');
-const chapters = require('./chapters');
-const steps = require('./steps');
-const createCommand = require('./create-command');
-const deleteCommand = require('./delete-command');
-const instructor = require('../instructor');
-const output = require('../output');
-const { snake, underscore } = require('./utils');
-const { unrecognized } = require('../common/errors');
-const general = require('./general');
+const courses = require('./cli/courses');
+const modules = require('./cli/modules');
+const chapters = require('./cli/chapters');
+const steps = require('./cli/steps');
+const createCommand = require('./cli/create-command');
+const deleteCommand = require('./cli/delete-command');
+const instructor = require('./instructor');
+const output = require('./output');
+const { snake, underscore } = require('./cli/utils');
+const { unrecognized } = require('./common/errors');
+const general = require('./cli/general');
+
+const { getBranchConfig } = require('./cli/git-helpers');
+const { isGitRepo } = require('./common/git-fs');
 
 const parseArg = (type, str) => {
     switch (type) {
@@ -71,7 +74,7 @@ const documentation = (first, second, { description, args }) => {
 
 const help = ({ command, subCommand }) => {
     if (!command) {
-        console.log('Learn It is a tool for creating and consuming knowledge through a structured gir repository.');
+        console.log('Learn It is a tool for creating and consuming knowledge through a structured git repository.');
         for (const command in commands) {
             help({ command });
         }
@@ -155,8 +158,9 @@ const writerCommands = {
         'module': modules.summarize,
         'chapter': chapters.summarize,
     },
+    'pack': courses.pack,
+    'unpack': courses.unpack,
     ...general,
-    'help': helpCommand,
 };
 
 const readerCommands = {
@@ -164,26 +168,44 @@ const readerCommands = {
     'output': output,
 };
 
-const commands = { ...writerCommands, ...readerCommands };
+const commands = {};
 
-const [command, ...rest] = process.argv.slice(2);
+async function learnit() {
+    const [command, ...rest] = process.argv.slice(2);
 
-if (!command || !(command in commands)) {
-    help({});
-    process.exit();
-}
+    if (await isGitRepo()) {
+        const { locked } = await getBranchConfig('main');
+        
+        if (!locked) {
+            Object.assign(commands, writerCommands);
+        }
 
-if (!rest.length) {
-    if ('command' in commands[command] && commands[command].command instanceof Function) {
-        commands[command].command({});
+        Object.assign(commands, readerCommands);
     } else {
-        help({ command });
+        Object.assign(commands, writerCommands);
+    }
+
+    Object.assign(commands, { help: helpCommand });
+
+    if (!command || !(command in commands)) {
+        help({});
         process.exit();
     }
-} else {
-    if (commands[command].command instanceof Function) {
-        processCommand(commands[command], rest);
+
+    if (!rest.length) {
+        if ('command' in commands[command] && commands[command].command instanceof Function) {
+            commands[command].command({});
+        } else {
+            help({ command });
+            process.exit();
+        }
     } else {
-        processCommand(commands[command][rest[0]], rest.slice(1));
+        if (commands[command].command instanceof Function) {
+            processCommand(commands[command], rest);
+        } else {
+            processCommand(commands[command][rest[0]], rest.slice(1));
+        }
     }
 }
+
+learnit();

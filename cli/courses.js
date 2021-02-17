@@ -128,4 +128,20 @@ module.exports = {
             await getState();
         }
     },
+    pack: {
+        description: 'Locks further development of the course and prepares the course for download.',
+        args: {},
+        async command() {
+            await git.raw('update-index', '--skip-worktree', 'learnit.config.json');
+            await setBranchValue('main', 'locked', true);
+        },
+    },
+    unpack: {
+        description: 'Unlocks the course for further development.',
+        args: {},
+        async command() {
+            await setBranchValue('main', 'locked', false);
+            await git.raw('update-index', '--unskip-worktree', 'learnit.config.json');
+        },
+    },
 };

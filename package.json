@@ -1,21 +1,20 @@
 {
-  "name": "learn-it",
+  "name": "learnit",
   "version": "1.0.0",
   "description": "Idea: Teach any course through a Git Repo, using branches and commits to let the student navigate the course.",
   "main": "index.js",
   "scripts": {
-    "start": "node instructor",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"There are no tests, as writing tests around a utility built on top of Git seemed impractical for the payoff.\""
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "colors": "^1.4.0",
-    "inquirer": "^7.3.3",
-    "simple-git": "^2.21.0"
+    "colors": "1.4.0",
+    "inquirer": "7.3.3",
+    "simple-git": "2.35.0"
   },
   "bin": {
-    "learnit": "./cli/index.js"
+    "learnit": "./index.js"
   },
   "engines": {
     "node": ">=12.0.0"
