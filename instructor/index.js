@@ -60,11 +60,16 @@ module.exports = {
 
         status.connect('instructor');
 
-        const deltaRunning = await status.check('delta');
+        let deltaRunning = await status.check('delta');
 
         if (!deltaRunning) {
-            console.log('To view the code changes a step refers to, run `learnit output --delta` in another terminal.');
-            await wait(5000);
+            console.log('To view the code changes a step refers to, run `learnit output snippets` in another terminal.');
+            console.log('Waiting until output command is run...');
+
+            while (!deltaRunning) {
+                await wait(3000);
+                deltaRunning = await status.check('delta');
+            }
         }
 
         const hasCommands = await hasCommandConfig();
@@ -73,7 +78,8 @@ module.exports = {
             let commandsRunning = await status.check('commands');
 
             console.log('This course runs commands to better illustrate the affects changes have.');
-            console.log('To view the output, run `learnit output --no-delta` in another terminal.');
+            console.log('To view the output, run `learnit output commands` in another terminal.');
+            console.log('Waiting until output command is run...');
 
             while (!commandsRunning) {
                 await wait(3000);

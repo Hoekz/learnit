@@ -29,6 +29,8 @@ chapter.
 
 ## Taking a Course
 
+You can download a course with `learnit download <git-url>`, or by cloning it yourself.
+
 ![Suggested Setup](./suggested-setup.png)
 
 You can take a course by cloning a repository created or meant to be read with Learn It.
