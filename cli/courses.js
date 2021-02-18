@@ -1,12 +1,10 @@
 const path = require('path');
-const simpleGit = require('simple-git');
+const git = require('../common/git');
 const { mapCourse, getState } = require('../common/course');
 const { unrecognized, missing } = require('../common/errors');
 const { chapterToBranch } = require('../common/utils');
-const { isExistingModule, getModule, setBranchValue } = require('./git-helpers');
+const { isExistingModule, getModule, setBranchValue, saveConfig } = require('./git-helpers');
 const gitFs = require('../common/git-fs');
-
-const git = simpleGit();
 
 const toIgnore = `
 # Learn It directory
@@ -128,20 +126,25 @@ module.exports = {
             await getState();
         }
     },
-    pack: {
+    lock: {
         description: 'Locks further development of the course and prepares the course for download.',
         args: {},
         async command() {
-            await git.raw('update-index', '--skip-worktree', 'learnit.config.json');
             await setBranchValue('main', 'locked', true);
+            await saveConfig();
+            await setBranchValue('main', 'locked', false);
+            await git.add('learnit.config.json');
+            await git.commit('lock: course locked.');
+            await git.raw('update-index', '--skip-worktree', 'learnit.config.json');
         },
     },
-    unpack: {
+    unlock: {
         description: 'Unlocks the course for further development.',
         args: {},
         async command() {
             await setBranchValue('main', 'locked', false);
-            await git.raw('update-index', '--unskip-worktree', 'learnit.config.json');
+            await git.raw('update-index', '--no-skip-worktree', 'learnit.config.json');
+            console.log('Course is unlocked.');
         },
     },
 };

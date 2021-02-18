@@ -1,8 +1,7 @@
-const simpleGit = require('simple-git');
+const git = require('../common/git');
 const colors = require('colors');
 const { moduleToBranch } = require('../common/utils');
 const gitFs = require('../common/git-fs');
-const git = simpleGit();
 
 const DIFF_BETWEEN = Symbol.for('DIFF_BETWEEN');
 const DIFF_INDEX = Symbol.for('DIFF_INDEX');

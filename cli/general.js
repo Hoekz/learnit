@@ -1,5 +1,4 @@
 const path = require('path');
-const simpleGit = require('simple-git');
 const { getState } = require('../common/course');
 const settings = require('../common/settings');
 const { getBranchConfig, chapterFrom, getModule, setBranchValue, saveConfig, loadConfig } = require('./git-helpers');
@@ -8,9 +7,8 @@ const courses = require('./courses');
 const modules = require('./modules');
 const chapters = require('./chapters');
 const { isGitRepo, rootDirectory } = require('../common/git-fs');
+const git = require('../common/git');
 const gitFs = require('../common/git-fs');
-
-const git = simpleGit();
 
 async function mergeAllRemote() {
     const { branches } = await git.fetch();
@@ -122,11 +120,17 @@ module.exports = {
 
             if (from) {
                 await git.clone(from);
-                await git.cwd(path.parse(from).name);
+                const folder = path.join(process.cwd(), path.parse(from).name);
+                await git.cwd(folder);
 
                 await trackAllRemote();
 
-                console.log('Download complete.');
+                console.log(`Download complete. Course is available at ${folder}.`);
+
+                await loadConfig();
+                await git.raw('update-index', '--skip-worktree', 'learnit.config.json');
+                await gitFs.rm('learnit.config.json');
+                console.log('learnit.config.json successfully applied');
             }
         },
     },

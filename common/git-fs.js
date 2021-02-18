@@ -1,6 +1,5 @@
 const fs = require('fs');
-const simpleGit = require('simple-git');
-const git = simpleGit();
+const git = require('./git');
 const path = require('path');
 
 let root;

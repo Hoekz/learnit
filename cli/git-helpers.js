@@ -1,8 +1,7 @@
-const simpleGit = require('simple-git');
 const { mapCourse } = require('../common/course');
+const git = require('../common/git');
 const gitFs = require('../common/git-fs');
 
-const git = simpleGit();
 
 const equals = (str) => (entry) => entry.value === str || entry.name.toLowerCase() === str.toLowerCase();
 

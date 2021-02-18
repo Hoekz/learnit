@@ -1,8 +1,6 @@
 const Saveable = require('./saveable');
-const simpleGit = require('simple-git');
+const git = require('../common/git');
 const { branchToModule, branchToChapter, moduleToBranch, chapterToBranch } = require('../common/utils');
-
-const git = simpleGit();
 
 const courseMap = { value: null };
 const state = new Saveable('state', null);

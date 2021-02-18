@@ -68,7 +68,7 @@ const onChange = (initial, listener) => {
     let oldState = JSON.parse(JSON.stringify(initial));
 
     return (newState) => {
-        if (!oldState ||
+        if (newState && !oldState ||
             oldState.module !== newState.module ||
             oldState.chapter !== newState.chapter ||
             oldState.step !== newState.step

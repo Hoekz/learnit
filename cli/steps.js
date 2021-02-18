@@ -1,12 +1,10 @@
 const path = require('path');
-const simpleGit = require('simple-git');
+const git = require('../common/git');
 const { getState } = require('../common/course');
 const { unrecognized } = require('../common/errors');
 const gitFs = require('../common/git-fs');
 const { scriptFor, addStep } = require('../common/script');
 const { chapterFrom, isExistingModule, isExistingChapter, getBranchConfig, getModule } = require('./git-helpers');
-
-const git = simpleGit();
 
 async function step(message, cwd) {
     const root = await gitFs.rootDirectory();

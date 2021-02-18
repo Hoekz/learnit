@@ -158,8 +158,8 @@ const writerCommands = {
         'module': modules.summarize,
         'chapter': chapters.summarize,
     },
-    'pack': courses.pack,
-    'unpack': courses.unpack,
+    'lock': courses.lock,
+    'unlock': courses.unlock,
     ...general,
 };
 
@@ -185,7 +185,7 @@ async function learnit() {
         Object.assign(commands, writerCommands);
     }
 
-    Object.assign(commands, { help: helpCommand });
+    Object.assign(commands, { help: helpCommand, download: general.download });
 
     if (!command || !(command in commands)) {
         help({});

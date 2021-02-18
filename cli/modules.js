@@ -1,5 +1,5 @@
 const { promises: fs } = require('fs');
-const simpleGit = require('simple-git');
+const git = require('../common/git');
 const inquirer = require('inquirer');
 const { getState, mapCourse } = require('../common/course');
 const { unrecognized } = require('../common/errors');
@@ -7,7 +7,7 @@ const { moduleToBranch, branchToModule, chapterToBranch } = require('../common/u
 const {
     isExistingModule, isExistingChapter,
     chapterFrom, getModule,
-    setBranchValue, setBranchDescription, getBranchConfig,
+    setBranchValue, setBranchDescription,
 } = require('./git-helpers');
 const { scriptFor, write } = require('../common/script');
 
@@ -15,8 +15,6 @@ async function save(message, cwd) {
     await git.add(cwd || process.cwd());
     await git.commit(`save: ${message || (new Date()).toLocaleString()}`, []);
 }
-
-const git = simpleGit();
 
 const ensureCwd = (cwd) => fs.mkdir(cwd, { recursive: true });
 

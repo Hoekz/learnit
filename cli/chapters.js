@@ -1,6 +1,6 @@
 const path = require('path');
 const inquirer = require('inquirer');
-const simpleGit = require('simple-git');
+const git = require('../common/git');
 const gitFs = require('../common/git-fs');
 const { getState, mapCourse } = require('../common/course');
 const { unrecognized } = require('../common/errors');
@@ -10,8 +10,6 @@ const {
     nextChapterIndex, isExistingChapter,
     getBranchConfig, setBranchValue, setBranchDescription, chapterFrom, getModule,
 } = require('./git-helpers');
-
-const git = simpleGit();
 
 async function save(message, cwd) {
     const root = await gitFs.rootDirectory();
