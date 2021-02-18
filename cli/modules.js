@@ -137,7 +137,11 @@ module.exports = {
             const hasOrigin = remotes.some(r => r.name === 'origin');
 
             if (!noRemote && hasOrigin) {
-                await git.push('origin', ['--delete', ...branches]);
+                try {
+                    await git.push('origin', ['--delete', ...branches]);
+                } catch(e) {
+                    console.log('No remote branches to delete.');
+                }
             }
         },
     },
