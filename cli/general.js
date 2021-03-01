@@ -115,7 +115,6 @@ module.exports = {
                 await trackAllRemote();
 
                 console.log('Download complete.');
-                process.exit();
             }
 
             if (from) {
