@@ -1,6 +1,6 @@
 {
   "name": "learnit",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Teach any course through a Git Repo, using branches and commits to let the student navigate the course.",
   "main": "index.js",
   "repository": {
