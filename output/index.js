@@ -53,6 +53,8 @@ const loadAllCommands = async () => {
 };
 
 const updateOutput = async (newState) => {
+    if (!newState) return;
+
     for (const command of allCommands) {
         if (command.running && !(await command.matches(newState))) {
             await command.stop();

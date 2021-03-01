@@ -126,12 +126,15 @@ module.exports = {
                 await trackAllRemote();
 
                 console.log(`Download complete. Course is available at ${folder}.`);
+            }
 
+            try {
+                await gitFs.access('learnit.config.json');
                 await loadConfig();
                 await git.raw('update-index', '--skip-worktree', 'learnit.config.json');
                 await gitFs.rm('learnit.config.json');
                 console.log('learnit.config.json successfully applied');
-            }
+            } catch(e) {}
         },
     },
     rebase: {
