@@ -4,7 +4,7 @@ const prompter = require('./prompter');
 const course = require('../common/course');
 const status = require('../common/status');
 const { wait } = require('../common/utils');
-const { hasCommandConfig } = require('../cli/git-helpers');
+const { hasCommandConfig, loadConfig } = require('../cli/git-helpers');
 const gitFs = require('../common/git-fs');
 
 async function next() {
@@ -48,15 +48,26 @@ async function next() {
 
 module.exports = {
     description: 'Start reading the course through the interactive instructor.',
-    args: {},
-    async command() {
+    args: {
+        ignoreConfig: {
+            description: `Skips over check for check for 'learnit.config.json'.`,
+            type: 'BOOL',
+            named: true,
+            optional: true,
+        }
+    },
+    async command({ ignoreConfig }) {
         let ableToNavigate = true;
 
-        try {
-            await gitFs.access('learnit.config.json');
-            console.log(`Detected 'learnit.config.json'. Run 'learnit config --load' to ensure course is properly configured.`);
-            process.exit(1);
-        } catch (e) {}
+        if (!ignoreConfig) {
+            try {
+                await gitFs.access('learnit.config.json');
+                console.log(`Detected 'learnit.config.json'. Loading...`);
+                await loadConfig();
+                await gitFs.rm('learnit.config.json');
+                console.log(`Config loaded. If you wish to start without loading the config, use the '--ignore-config' flag.`);
+            } catch (e) {}
+        }
 
         status.connect('instructor');
 
